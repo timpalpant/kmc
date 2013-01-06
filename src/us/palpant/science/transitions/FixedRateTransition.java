@@ -1,4 +1,4 @@
-package us.palpant.science.nucleosomes;
+package us.palpant.science.transitions;
 
 /**
  * A Transition that occurs with a fixed rate constant
@@ -13,7 +13,7 @@ public abstract class FixedRateTransition implements Transition {
 	}
 	
 	@Override
-	public double getRate() {
+	public final double getRate() {
 		return rate;
 	}
 }

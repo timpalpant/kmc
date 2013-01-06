@@ -1,6 +1,10 @@
-package us.palpant.science.nucleosomes;
+package us.palpant.science;
 
 import java.util.Collection;
+
+import org.apache.log4j.Logger;
+
+import us.palpant.science.transitions.Transition;
 
 /**
  * Transition managers return a list of Transitions for a given lattice
@@ -9,6 +13,8 @@ import java.util.Collection;
  *
  */
 public abstract class TransitionManager {
+	private static final Logger log = Logger.getLogger(TransitionManager.class);
+	
 	/**
 	 * The Lattice that this TransitionManager is managing
 	 */
@@ -29,16 +35,17 @@ public abstract class TransitionManager {
 	 * @param u a random variable, uniformly distributed \in [0,1]
 	 * @return the randomly selected Transition corresponding to u
 	 */
-	public Transition getTransition(double u) {
+	public static Transition getTransition(Collection<Transition> transitions, double u) {
 		if (u < 0 || u > 1) {
 			throw new IllegalArgumentException("u must be in [0,1]! (u = "+u+")");
 		}
 		
-		double selected = u * getRateTotal();
+		double selected = u * getRateTotal(transitions);
 		double cumulative = 0;
-		for (Transition t : getAllTransitions()) {
+		for (Transition t : transitions) {
 			cumulative += t.getRate();
 			if (cumulative >= selected) {
+				log.debug("Selected random transition: "+t);
 				return t;
 			}
 		}
@@ -50,11 +57,12 @@ public abstract class TransitionManager {
 	 * Get the sum of the rates for all transitions
 	 * @return the sum of the rates of all possible transitions
 	 */
-	public double getRateTotal() {
+	public static double getRateTotal(Collection<Transition> transitions) {
 		double total = 0;
-		for (Transition t : getAllTransitions()) {
+		for (Transition t : transitions) {
 			total += t.getRate();
 		}
+		log.debug(transitions.size()+" transitions with total rate = "+total);
 		return total;
 	}
 }

@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Main-Class: us.palpant.science.Simulate
+Bundle-ManifestVersion: 2
+Bundle-Name: kinetic-nucleosomes
+Bundle-SymbolicName: kinetic-nucleosomes
+Bundle-Version: 1.0.0
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Description: Run Monte Carlo simulations of nucleosome kinetics
+Bundle-DocURL: http://github.com/timpalpant/kinetic-nucleosomes

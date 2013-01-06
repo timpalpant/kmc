@@ -1,8 +1,10 @@
-package us.palpant.science.nucleosomes;
+package us.palpant.science;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.TreeSet;
@@ -35,6 +37,14 @@ public class Lattice implements Iterable<LatticeObject> {
 	private TreeSet<LatticeObject> objects = new TreeSet<LatticeObject>(new PositionComparator());
 	
 	/**
+	 * Create a new Lattice of a given length
+	 * @param length the number of points on the Lattice
+	 */
+	public Lattice(int length) {
+		this(new double[length]);
+	}
+	
+	/**
 	 * Create a new Lattice with the given potential
 	 * @param potential the potential energy for each point in the Lattice
 	 */
@@ -52,10 +62,16 @@ public class Lattice implements Iterable<LatticeObject> {
 		return objects.iterator();
 	}
 	
+	/**
+	 * @return the first object in the Lattice
+	 */
 	public LatticeObject first() {
 		return objects.first();
 	}
 	
+	/**
+	 * @return the last object in the Lattice
+	 */
 	public LatticeObject last() {
 		return objects.last();
 	}
@@ -100,8 +116,25 @@ public class Lattice implements Iterable<LatticeObject> {
 	 * @param i the position in the lattice
 	 * @return the potential for position i
 	 */
-	public double potential(int i) {
+	public double getPotential(int i) {
 		return potential[i];
+	}
+	
+	/**
+	 * @return the positions of all objects on the Lattice
+	 */
+	public List<Integer> getAllPositions() {
+		// This might be faster, but would decouple the sort order from the Comparator
+		// List<Integer> allPositions = new ArrayList<Integer>(positions.values());
+		// Collections.sort(allPositions);
+		// return allPositions;
+		
+		List<Integer> allPositions = new ArrayList<Integer>(numObjects());
+		for (LatticeObject o : this) {
+			allPositions.add(getPosition(o));
+		}
+		
+		return allPositions;
 	}
 	
 	/**
@@ -109,7 +142,7 @@ public class Lattice implements Iterable<LatticeObject> {
 	 * @param object the object of interest
 	 * @return the position of the object on the lattice
 	 */
-	public int getPosition(LatticeObject object) {
+	public Integer getPosition(LatticeObject object) {
 		return positions.get(object);
 	}
 	
@@ -122,13 +155,13 @@ public class Lattice implements Iterable<LatticeObject> {
 	 */
 	public void setPosition(LatticeObject object, int pos) throws NoSuchElementException {
 		if (!objects.contains(object)) {
-			throw new NoSuchElementException("Cannot update the position of a nucleosome not in the Lattice!");
+			throw new NoSuchElementException("Cannot update the position of an object not in the Lattice!");
 		}
 		
-		// Check for collisions in the new location
+		// It is necessary to remove and re-add the object
+		// to maintain the sort order of the TreeSet
 		objects.remove(object);
-		positions.put(object, getPeriodicWrap(pos));
-		objects.add(object);
+		addObject(object, pos);
 	}
 	
 	/**
@@ -157,10 +190,13 @@ public class Lattice implements Iterable<LatticeObject> {
 	 * @return the periodic-wrapped index of pos
 	 */
 	public int getPeriodicWrap(int pos) {
-		if (pos < 0) {
-			return size() + pos;
-		} else if (pos >= size()) {
-			return pos % size();
+		if (bc == BoundaryCondition.PERIODIC) {
+			if (pos < 0) {
+				// Recurse until pos is within [0, size())
+				return getPeriodicWrap(size() + pos);
+			} else if (pos >= size()) {
+				return pos % size();
+			}
 		}
 		
 		return pos;
@@ -215,16 +251,16 @@ public class Lattice implements Iterable<LatticeObject> {
 	private class PositionComparator implements Comparator<LatticeObject> {
 
 		@Override
-		public int compare(LatticeObject n1, LatticeObject n2) {
-			if (!positions.containsKey(n1)) {
-				throw new IllegalArgumentException("Cannot compare position of nucleosome "+n1+" not in lattice");
+		public int compare(LatticeObject o1, LatticeObject o2) {
+			if (!positions.containsKey(o1)) {
+				throw new IllegalArgumentException("Cannot compare position of object "+o1+" not in lattice");
 			}
-			if (!positions.containsKey(n2)) {
-				throw new IllegalArgumentException("Cannot compare position of nucleosome "+n2+" not in lattice");
+			if (!positions.containsKey(o2)) {
+				throw new IllegalArgumentException("Cannot compare position of object "+o2+" not in lattice");
 			}
 
-			int pos1 = positions.get(n1);
-			int pos2 = positions.get(n2);
+			int pos1 = positions.get(o1);
+			int pos2 = positions.get(o2);
 			return Integer.compare(pos1, pos2);
 		}
 		

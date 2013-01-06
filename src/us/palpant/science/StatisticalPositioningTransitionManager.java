@@ -1,8 +1,14 @@
-package us.palpant.science.nucleosomes;
+package us.palpant.science;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import us.palpant.science.transitions.AdsorptionTransition;
+import us.palpant.science.transitions.DesorptionTransition;
+import us.palpant.science.transitions.SlideTransition;
+import us.palpant.science.transitions.ThermalSlideTransition;
+import us.palpant.science.transitions.Transition;
 
 /**
  * A TransitionManager that only considers adsorption, desorption, and thermal equilibration

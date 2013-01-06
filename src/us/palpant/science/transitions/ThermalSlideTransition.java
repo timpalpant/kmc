@@ -1,4 +1,8 @@
-package us.palpant.science.nucleosomes;
+package us.palpant.science.transitions;
+
+import us.palpant.science.Lattice;
+import us.palpant.science.LatticeObject;
+import us.palpant.science.Parameters;
 
 /**
  * A SlideTransition representing thermal equilibration to a new location
@@ -17,8 +21,8 @@ public class ThermalSlideTransition extends SlideTransition {
 
 	@Override
 	public double getRate() {
-		double vi = lattice.potential(lattice.getPosition(object));
-		double vj = lattice.potential(lattice.getPeriodicWrap(newPosition));
+		double vi = lattice.getPotential(lattice.getPosition(object));
+		double vj = lattice.getPotential(lattice.getPeriodicWrap(newPosition));
 		return rate * Math.exp((Parameters.BETA/2) * (vi-vj));
 	}
 

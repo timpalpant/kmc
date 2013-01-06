@@ -1,7 +1,7 @@
-package us.palpant.science.nucleosomes;
+package us.palpant.science;
 
 /**
- * Represents a nucleosome on the Lattice
+ * Represents a symmetric nucleosome on the Lattice
  * @author palpant
  *
  */

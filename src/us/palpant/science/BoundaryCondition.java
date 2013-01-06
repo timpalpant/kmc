@@ -1,4 +1,4 @@
-package us.palpant.science.nucleosomes;
+package us.palpant.science;
 /**
  * Enumeration of possible boundary conditions
  * @author palpant

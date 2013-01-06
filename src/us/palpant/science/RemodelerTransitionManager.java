@@ -1,11 +1,15 @@
-package us.palpant.science.nucleosomes;
+package us.palpant.science;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import us.palpant.science.transitions.SlideTransition;
+import us.palpant.science.transitions.Transition;
+
 /**
- * Manage the List of Transitions for a Lattice
+ * Include all thermal (equilibrium) transitions, plus non-equilibrium
+ * ATP-dependent remodeling
  * @author timpalpant
  *
  */

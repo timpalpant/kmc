@@ -1,4 +1,4 @@
-package us.palpant.science.nucleosomes;
+package us.palpant.science.transitions;
 /**
  * Interface for all Transitions
  * @author palpant

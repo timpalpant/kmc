@@ -1,4 +1,8 @@
-package us.palpant.science.nucleosomes;
+package us.palpant.science.transitions;
+
+import us.palpant.science.Lattice;
+import us.palpant.science.LatticeObject;
+import us.palpant.science.Parameters;
 
 /**
  * A Transition whose rate is Boltzmann-weighted by the potential at the LatticeObject's position
@@ -18,8 +22,8 @@ public abstract class PotentialTransition implements Transition {
 	}
 
 	@Override
-	public double getRate() {
-		return rateConstant * Math.exp(Parameters.BETA * lattice.potential(lattice.getPosition(object)));
+	public final double getRate() {
+		return rateConstant * Math.exp(Parameters.BETA * lattice.getPotential(lattice.getPosition(object)));
 	}
 
 }
