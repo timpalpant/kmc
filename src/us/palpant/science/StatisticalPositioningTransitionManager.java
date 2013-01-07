@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import us.palpant.science.transitions.AdsorptionTransition;
 import us.palpant.science.transitions.DesorptionTransition;
 import us.palpant.science.transitions.SlideTransition;
@@ -17,6 +19,8 @@ import us.palpant.science.transitions.Transition;
  */
 public class StatisticalPositioningTransitionManager extends TransitionManager {
 
+	private static final Logger log = Logger.getLogger(StatisticalPositioningTransitionManager.class);
+	
 	protected StatisticalPositioningTransitionManager(Lattice lattice) {
 		super(lattice);
 	}

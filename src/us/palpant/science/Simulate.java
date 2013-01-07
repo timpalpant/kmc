@@ -63,7 +63,7 @@ public class Simulate {
 		} else {
 			log.info("Initializing flat potential energy landscape with value = "+vEff);
 			potential = new double[latticeLength];
-			Arrays.fill(potential, vEff);
+			Arrays.fill(potential, vEff * Parameters.BETA);
 		}
 		
 		return potential;
