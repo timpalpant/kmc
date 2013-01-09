@@ -1,0 +1,7 @@
+option java_package = "us.palpant.science.io";
+option java_outer_classname = "FrameProto";
+
+message Frame {
+  required double time = 1;
+  repeated uint32 positions = 2 [packed=true];
+}
