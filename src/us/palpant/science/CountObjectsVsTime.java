@@ -15,14 +15,14 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
-public class TrajectoryToAscii {
+public class CountObjectsVsTime {
 
-  private static final Logger log = Logger.getLogger(TrajectoryToAscii.class);
+  private static final Logger log = Logger.getLogger(CountObjectsVsTime.class);
   
   @Parameter(names = { "-i", "--input" }, description = "Input trajectory", 
       required = true, converter = PathConverter.class, validateWith = ReadablePathValidator.class)
   public Path inputFile;
-  @Parameter(names = { "-o", "--output" }, description = "Output ASCII trajectory", 
+  @Parameter(names = { "-o", "--output" }, description = "Output file with number of objects at each time", 
       required = true, converter = PathConverter.class)
   public Path outputFile;
   
@@ -31,22 +31,13 @@ public class TrajectoryToAscii {
     int count = 0;
     try (TrajectoryReader reader = new TrajectoryReader(inputFile);
          PrintWriter writer = new PrintWriter(Files.newBufferedWriter(outputFile, Charset.defaultCharset()))) {
-      log.info("Translating...");
       Frame frame = null;
       while ((frame = reader.readFrame()) != null) {
-        writer.print(frame.getTime()+"\t");
-        int[] positions = frame.getPositions();
-        for (int i = 0; i < positions.length; i++) {
-          writer.print(positions[i]);
-          if (i+1 < positions.length) {
-            writer.print(',');
-          }
-        }
-        writer.println();
+        writer.println(frame.getTime()+"\t"+frame.getPositions().length);
         count++;
       } 
     }
-    log.info("Wrote "+count+" frames");
+    log.info("Processed "+count+" frames");
   }
   
   /**
@@ -55,10 +46,10 @@ public class TrajectoryToAscii {
    * @throws ClassNotFoundException 
    */
   public static void main(String[] args) throws ClassNotFoundException, IOException {
-    TrajectoryToAscii app = new TrajectoryToAscii();
+    CountObjectsVsTime app = new CountObjectsVsTime();
     // Initialize the command-line options parser
     JCommander jc = new JCommander(app);
-    jc.setProgramName("TrajectoryToAscii");
+    jc.setProgramName("CountObjectsVersusTime");
 
     try {
       jc.parse(args);

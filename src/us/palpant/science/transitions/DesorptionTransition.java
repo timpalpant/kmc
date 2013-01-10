@@ -3,7 +3,6 @@ package us.palpant.science.transitions;
 import org.apache.log4j.Logger;
 
 import us.palpant.science.Lattice;
-import us.palpant.science.Parameters;
 import us.palpant.science.objects.LatticeObject;
 
 /**
@@ -12,16 +11,17 @@ import us.palpant.science.objects.LatticeObject;
  * @author palpant
  * 
  */
-public class DesorptionTransition extends PotentialTransition {
+public class DesorptionTransition extends FixedRateTransition {
 
   private static final Logger log = Logger.getLogger(DesorptionTransition.class);
 
+  private final Lattice lattice;
+  private final LatticeObject object;
+  
   public DesorptionTransition(Lattice lattice, LatticeObject object, double rate) {
-    super(lattice, object, rate);
-  }
-
-  public DesorptionTransition(Lattice lattice, LatticeObject object) {
-    this(lattice, object, Parameters.K_ON);
+    super(rate);
+    this.lattice = lattice;
+    this.object = object;
   }
 
   @Override

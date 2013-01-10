@@ -32,22 +32,30 @@ public class SimulateTrajectory {
 
   @Parameter(names = { "-i", "--potential" }, description = "Input file with potential energy landscape", 
              converter = PathConverter.class, validateWith = ReadablePathValidator.class)
-  public Path potentialEnergyFile;
+  private Path potentialEnergyFile;
   @Parameter(names = { "-l", "--length" }, description = "Length of lattice to simulate, if potential is not provided")
-  public int latticeLength = 5000;
+  private int latticeLength = 5000;
   @Parameter(names = { "--veff" }, description = "If potential is not provided, initialize flat potential with this value")
-  public double vEff = 0;
-  @Parameter(names = { "-t", "--time" }, description = "Length of time to simulate", required = true)
-  public double tFinal;
+  private double vEff = 0;
+  @Parameter(names = { "-t", "--time" }, description = "Length of time to simulate (min)", required = true)
+  private double tFinal;
   @Parameter(names = {"-p", "--periodic"}, description = "Use periodic boundary conditions")
-  public boolean periodic = false;
+  private boolean periodic = false;
   @Parameter(names = { "--seed" }, description = "Seed for random number generator")
-  public long seed = 123456789;
+  private long seed = 123456789;
   @Parameter(names = { "-o", "--output" }, description = "Output trajectory with Lattice configuration at each timestep", 
              converter = PathConverter.class, required = true)
-  public Path outputFile;
+  private Path outputFile;
 
+  /**
+   * Simulation parameters
+   */
+  private final Parameters params;
   public static final int NUM_CHECKPOINTS = 10;
+  
+  private SimulateTrajectory(Parameters params) {
+	  this.params = params;
+  }
   
   private double[] loadPotential() throws IOException {
     double[] potential = null;
@@ -67,7 +75,7 @@ public class SimulateTrajectory {
     } else {
       log.info("Creating flat potential energy landscape with length = "+latticeLength+" and value = "+vEff);
       potential = new double[latticeLength];
-      Arrays.fill(potential, vEff * Parameters.BETA);
+      Arrays.fill(potential, vEff * params.getBeta());
     }
 
     return potential;
@@ -77,13 +85,13 @@ public class SimulateTrajectory {
     return periodic ? Lattice.BoundaryCondition.PERIODIC : Lattice.BoundaryCondition.FIXED;
   }
 
-  public Lattice initLattice() throws IOException {
+  private Lattice initLattice() throws IOException {
     log.info("Using " + getBoundaryCondition().toString() + " boundary conditions");
     return new Lattice(loadPotential(), getBoundaryCondition());
   }
 
-  public TransitionManager initTransitionManager(Lattice lattice) {
-    return new RemodelerTransitionManager(lattice);
+  private TransitionManager initTransitionManager(Lattice lattice) {
+    return new RemodelerTransitionManager(lattice, params);
   }
 
   /**
@@ -93,8 +101,10 @@ public class SimulateTrajectory {
    * @throws IOException
    */
   private void run() throws IOException {
+    log.info("Simulation parameters: " + params.toString());
     Lattice lattice = initLattice();
     TransitionManager manager = initTransitionManager(lattice);
+    log.info("Seed = " + seed);
     Random rng = new Random(seed);
     double t = 0;
 
@@ -137,9 +147,10 @@ public class SimulateTrajectory {
    * @throws IOException
    */
   public static void main(String[] args) throws IOException {
-    SimulateTrajectory app = new SimulateTrajectory();
+	Parameters params = new Parameters();
+    SimulateTrajectory app = new SimulateTrajectory(params);
     // Initialize the command-line options parser
-    JCommander jc = new JCommander(app);
+    JCommander jc = new JCommander(new Object[] {app, params});
     jc.setProgramName("SimulateTrajectory");
 
     try {

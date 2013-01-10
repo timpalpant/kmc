@@ -1,7 +1,5 @@
 package us.palpant.science.objects;
 
-import us.palpant.science.Parameters;
-
 /**
  * Represents a symmetric nucleosome on the Lattice
  * 
@@ -17,10 +15,6 @@ public class FixedWidthObject implements LatticeObject {
 
   public FixedWidthObject(int size) {
     this.setSize(size);
-  }
-
-  public FixedWidthObject() {
-    this(Parameters.NUC_SIZE);
   }
 
   @Override
@@ -44,12 +38,6 @@ public class FixedWidthObject implements LatticeObject {
   @Override
   public String toString() {
     return "Nucleosome";
-  }
-
-  public static class Factory implements LatticeObjectFactory {
-    public FixedWidthObject newInstance() {
-      return new FixedWidthObject();
-    }
   }
 
 }

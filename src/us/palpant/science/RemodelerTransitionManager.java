@@ -21,8 +21,8 @@ public class RemodelerTransitionManager extends StatisticalPositioningTransition
 
   private static final Logger log = Logger.getLogger(RemodelerTransitionManager.class);
 
-  public RemodelerTransitionManager(Lattice lattice) {
-    super(lattice);
+  public RemodelerTransitionManager(Lattice lattice, Parameters params) {
+    super(lattice, params);
   }
 
   @Override
@@ -61,15 +61,15 @@ public class RemodelerTransitionManager extends StatisticalPositioningTransition
         int lastHigh = last.high(lastPos);
         if (low <= 0) {
           linker = lattice.getPeriodicWrap(low) - lastHigh;
-          if (linker >= Parameters.L_MIN) {
-            transitions.add(new SlideTransition(lattice, object, pos - Parameters.REMODELER_STEP_SIZE,
+          if (linker >= params.getLMin()) {
+            transitions.add(new SlideTransition(lattice, object, pos - params.getRemodelerStepSize(),
                 getRateForLinker(linker)));
           }
         }
         if (lastHigh + 1 >= end) {
           linker = low - lattice.getPeriodicWrap(lastHigh);
-          if (linker <= Parameters.L_MIN) {
-            transitions.add(new SlideTransition(lattice, last, lastPos + Parameters.REMODELER_STEP_SIZE,
+          if (linker <= params.getLMin()) {
+            transitions.add(new SlideTransition(lattice, last, lastPos + params.getRemodelerStepSize(),
                 getRateForLinker(linker)));
           }
         }
@@ -78,8 +78,8 @@ public class RemodelerTransitionManager extends StatisticalPositioningTransition
       do {
         // Slide left
         linker = low - start;
-        if (linker >= Parameters.L_MIN) {
-          transitions.add(new SlideTransition(lattice, object, pos - Parameters.REMODELER_STEP_SIZE,
+        if (linker >= params.getLMin()) {
+          transitions.add(new SlideTransition(lattice, object, pos - params.getRemodelerStepSize(),
               getRateForLinker(linker)));
         }
         start = high;
@@ -90,8 +90,8 @@ public class RemodelerTransitionManager extends StatisticalPositioningTransition
           low = next.low(nPos);
           // Slide right
           linker = low - high;
-          if (linker >= Parameters.L_MIN) {
-            transitions.add(new SlideTransition(lattice, object, pos + Parameters.REMODELER_STEP_SIZE,
+          if (linker >= params.getLMin()) {
+            transitions.add(new SlideTransition(lattice, object, pos + params.getRemodelerStepSize(),
                 getRateForLinker(linker)));
           }
           object = next;
@@ -102,13 +102,13 @@ public class RemodelerTransitionManager extends StatisticalPositioningTransition
 
       // The last nucleosome
       linker = low - start;
-      if (linker >= Parameters.L_MIN) {
-        transitions.add(new SlideTransition(lattice, object, pos - Parameters.REMODELER_STEP_SIZE,
+      if (linker >= params.getLMin()) {
+        transitions.add(new SlideTransition(lattice, object, pos - params.getRemodelerStepSize(),
             getRateForLinker(linker)));
       }
       linker = end - high;
-      if (linker >= Parameters.L_MIN) {
-        transitions.add(new SlideTransition(lattice, object, pos + Parameters.REMODELER_STEP_SIZE,
+      if (linker >= params.getLMin()) {
+        transitions.add(new SlideTransition(lattice, object, pos + params.getRemodelerStepSize(),
             getRateForLinker(linker)));
       }
     }
@@ -117,15 +117,15 @@ public class RemodelerTransitionManager extends StatisticalPositioningTransition
   }
 
   private double getRateForLinker(int linker) {
-    double pml = Parameters.K0;
-    if (Parameters.LINKER_DEPENDENT_RATE) {
-      if (linker > Parameters.L_MAX) {
-        linker = Parameters.L_MAX;
+    double rate = params.getK0();
+    if (params.useLinkerDependentRate()) {
+      if (linker > params.getLMax()) {
+        linker = params.getLMax();
       }
-      pml *= Math.exp(Parameters.A * linker);
+      rate *= Math.exp(params.getA() * linker);
     }
 
-    return pml * Parameters.ATP / (Parameters.ATP + Parameters.K_M);
+    return rate;
   }
 
 }

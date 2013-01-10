@@ -20,9 +20,11 @@ public abstract class TransitionManager {
    * The Lattice that this TransitionManager is managing
    */
   protected final Lattice lattice;
+  protected final Parameters params;
 
-  protected TransitionManager(Lattice lattice) {
+  protected TransitionManager(Lattice lattice, Parameters params) {
     this.lattice = lattice;
+    this.params = params;
   }
 
   /**

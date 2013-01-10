@@ -14,7 +14,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import us.palpant.science.io.Frame;
 import us.palpant.science.io.TrajectoryReader;
@@ -29,9 +28,11 @@ public class VisualizeTrajectory {
   private Frame nextFrame;
   private double t = 0;
   
-  @Parameter(names = { "-i", "--input" }, description = "Input file with trajetory", 
+  @Parameter(names = { "-i", "--input" }, description = "Input file with trajectory", required = true,
       converter = PathConverter.class, validateWith = ReadablePathValidator.class)
   public Path inputFile;
+  @Parameter(names = { "-n", "--nuc-size" }, description = "Nucleosome size (bp)")
+  public int nucSize = 147;
   @Parameter(names = { "-t", "--time" }, description = "Length of time to simulate", required = true)
   public double tFinal;
 
@@ -71,7 +72,7 @@ public class VisualizeTrajectory {
    * @throws IOException
    */
   private void initialize() throws IOException {
-    frame.setBounds(100, 100, 800, 100);
+    frame.setBounds(100, 100, 800, 80);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
     progressBar.setMaximum((int) (100*tFinal));
@@ -85,7 +86,7 @@ public class VisualizeTrajectory {
       e1.printStackTrace();
     }
     
-    latticePanel = new LatticePanel(reader.getLatticeSize());
+    latticePanel = new LatticePanel(reader.getLatticeSize(), nucSize);
     frame.getContentPane().add(latticePanel, BorderLayout.CENTER);
 
     new javax.swing.Timer(30, new ActionListener() {

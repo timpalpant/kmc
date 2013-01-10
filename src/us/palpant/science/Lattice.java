@@ -1,10 +1,8 @@
 package us.palpant.science;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.TreeSet;
@@ -124,14 +122,14 @@ public class Lattice implements Iterable<LatticeObject> {
   }
 
   /**
-   * Get the potential at position i
+   * Get the potential at position pos
    * 
-   * @param i
+   * @param pos
    *          the position in the lattice
-   * @return the potential for position i
+   * @return the potential for position pos
    */
-  public double getPotential(int i) {
-    return potential[i];
+  public double getPotential(int pos) {
+    return potential[getPeriodicWrap(pos)];
   }
 
   /**

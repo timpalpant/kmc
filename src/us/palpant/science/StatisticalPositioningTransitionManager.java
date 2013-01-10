@@ -7,12 +7,10 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import us.palpant.science.objects.LatticeObject;
-import us.palpant.science.objects.LatticeObjectFactory;
 import us.palpant.science.objects.FixedWidthObject;
 import us.palpant.science.transitions.AdsorptionTransition;
 import us.palpant.science.transitions.DesorptionTransition;
 import us.palpant.science.transitions.SlideTransition;
-import us.palpant.science.transitions.ThermalSlideTransition;
 import us.palpant.science.transitions.Transition;
 
 /**
@@ -26,8 +24,8 @@ public class StatisticalPositioningTransitionManager extends TransitionManager {
 
   private static final Logger log = Logger.getLogger(StatisticalPositioningTransitionManager.class);
 
-  protected StatisticalPositioningTransitionManager(Lattice lattice) {
-    super(lattice);
+  protected StatisticalPositioningTransitionManager(Lattice lattice, Parameters params) {
+    super(lattice, params);
   }
 
   @Override
@@ -59,12 +57,13 @@ public class StatisticalPositioningTransitionManager extends TransitionManager {
     List<AdsorptionTransition> transitions = new ArrayList<AdsorptionTransition>();
     int start = 0;
     int end = lattice.size();
-    LatticeObjectFactory factory = new FixedWidthObject.Factory();
+    int halfNuc = params.getNucSize() / 2;
     for (LatticeObject object : lattice) {
       int pos = lattice.getPosition(object);
       int low = object.low(pos);
-      for (int i = start + Parameters.NUC_SIZE / 2 + 1; i + Parameters.NUC_SIZE / 2 < low; i++) {
-        transitions.add(new AdsorptionTransition(lattice, factory, i));
+      for (int i = start+halfNuc+1; i+halfNuc < low; i++) {
+    	LatticeObject newObject = new FixedWidthObject(params.getNucSize());
+        transitions.add(new AdsorptionTransition(lattice, newObject, i, params.getKOn()));
       }
       start = object.high(pos);
     }
@@ -75,12 +74,14 @@ public class StatisticalPositioningTransitionManager extends TransitionManager {
     if (lattice.getBoundaryCondition() == Lattice.BoundaryCondition.PERIODIC && lattice.numObjects() > 0) {
       LatticeObject first = lattice.first();
       int firstLow = first.low(lattice.getPosition(first));
-      for (int i = start + Parameters.NUC_SIZE / 2 + 1; lattice.getPeriodicWrap(i + Parameters.NUC_SIZE / 2) < firstLow; i++) {
-        transitions.add(new AdsorptionTransition(lattice, factory, i));
+      for (int i = start+halfNuc+1; lattice.getPeriodicWrap(i+halfNuc) < firstLow; i++) {
+        LatticeObject newObject = new FixedWidthObject(params.getNucSize());
+        transitions.add(new AdsorptionTransition(lattice, newObject, i, params.getKOn()));
       }
     } else {
-      for (int i = start + Parameters.NUC_SIZE / 2 + 1; i + Parameters.NUC_SIZE / 2 < end; i++) {
-        transitions.add(new AdsorptionTransition(lattice, factory, i));
+      for (int i = start+halfNuc+1; i+halfNuc < end; i++) {
+    	LatticeObject newObject = new FixedWidthObject(params.getNucSize());
+        transitions.add(new AdsorptionTransition(lattice, newObject, i, params.getKOn()));
       }
     }
 
@@ -99,7 +100,8 @@ public class StatisticalPositioningTransitionManager extends TransitionManager {
     List<DesorptionTransition> transitions = new ArrayList<DesorptionTransition>();
 
     for (LatticeObject object : lattice) {
-      transitions.add(new DesorptionTransition(lattice, object));
+      double rate = params.getKOn() * Math.exp(params.getBeta() * lattice.getPotential(lattice.getPosition(object)));
+      transitions.add(new DesorptionTransition(lattice, object, rate));
     }
 
     return transitions;
@@ -128,20 +130,20 @@ public class StatisticalPositioningTransitionManager extends TransitionManager {
         int lastHigh = last.high(lastPos);
         if (low <= 0) {
           if (lastHigh < lattice.getPeriodicWrap(low - 1)) {
-            transitions.add(new ThermalSlideTransition(lattice, object, low - 1));
+            transitions.add(getThermalSlideTransition(object, pos-1));
           }
         }
         if (lastHigh + 1 >= end) {
           if (lattice.getPeriodicWrap(lastHigh + 1) < low) {
-            transitions.add(new ThermalSlideTransition(lattice, last, lastHigh + 1));
+            transitions.add(getThermalSlideTransition(object, pos+1));
           }
         }
       }
 
       do {
         // Slide left
-        if (low - 1 > start) {
-          transitions.add(new ThermalSlideTransition(lattice, object, pos - 1));
+        if (low-1 > start) {
+          transitions.add(getThermalSlideTransition(object, pos-1));
         }
         start = high;
 
@@ -150,8 +152,8 @@ public class StatisticalPositioningTransitionManager extends TransitionManager {
           int nPos = lattice.getPosition(next);
           low = next.low(nPos);
           // Slide right
-          if (high + 1 < low) {
-            transitions.add(new ThermalSlideTransition(lattice, object, pos + 1));
+          if (high+1 < low) {
+            transitions.add(getThermalSlideTransition(object, pos+1));
           }
           object = next;
           pos = nPos;
@@ -160,15 +162,23 @@ public class StatisticalPositioningTransitionManager extends TransitionManager {
       } while (it.hasNext());
 
       // The last nucleosome
-      if (low - 1 > start) {
-        transitions.add(new ThermalSlideTransition(lattice, object, pos - 1));
+      if (low-1 > start) {
+        transitions.add(getThermalSlideTransition(object, pos-1));
       }
-      if (high + 1 < end) {
-        transitions.add(new ThermalSlideTransition(lattice, object, pos + 1));
+      if (high+1 < end) {
+        transitions.add(getThermalSlideTransition(object, pos+1));
       }
     }
 
     return transitions;
+  }
+  
+  private SlideTransition getThermalSlideTransition(LatticeObject object, int newPos) {
+	int pos = lattice.getPosition(object);
+	double vi = lattice.getPotential(pos);
+  	double vj = lattice.getPotential(lattice.getPeriodicWrap(newPos));
+  	double rate = params.getDiffusion() * Math.exp((params.getBeta()/2) * (vi - vj));
+    return new SlideTransition(lattice, object, newPos, rate);
   }
 
 }
