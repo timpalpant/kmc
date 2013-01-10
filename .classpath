@@ -9,7 +9,5 @@
 	<classpathentry kind="lib" path="lib/junit.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
 	<classpathentry kind="lib" path="lib/jcommander-1.31.jar"/>
-	<classpathentry kind="lib" path="lib/protobuf-java-2.5.0rc1.jar"/>
-	<classpathentry kind="lib" path="lib/minueto-2.0.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

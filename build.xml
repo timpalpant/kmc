@@ -15,6 +15,7 @@
   <!-- directory variables -->
   <property name="src" location="src" />
   <property name="test" location="test" />
+  <property name="gui" location="gui" />
   <property name="build" location="build" />
   <property name="dist" location="dist" />
   <property name="lib" location="lib" />
@@ -38,6 +39,12 @@
 
     <!-- Compile the java code from ${test} into ${build} -->
     <javac srcdir="${test}" destdir="${build}" source="1.7" target="1.7" debug="true">
+      <classpath location="${build}" />
+      <classpath refid="classpath" />
+    </javac>
+    
+    <!-- Compile the java code from ${gui} into ${build} -->
+    <javac srcdir="${gui}" destdir="${build}" source="1.7" target="1.7" debug="true">
       <classpath location="${build}" />
       <classpath refid="classpath" />
     </javac>

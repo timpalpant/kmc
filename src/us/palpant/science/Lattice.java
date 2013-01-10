@@ -137,16 +137,12 @@ public class Lattice implements Iterable<LatticeObject> {
   /**
    * @return the positions of all objects on the Lattice
    */
-  public List<Integer> getAllPositions() {
-    // This might be faster, but would decouple the sort order from the
-    // Comparator
-    // List<Integer> allPositions = new ArrayList<Integer>(positions.values());
-    // Collections.sort(allPositions);
-    // return allPositions;
-
-    List<Integer> allPositions = new ArrayList<Integer>(numObjects());
+  public int[] getAllPositions() {
+    int[] allPositions = new int[numObjects()];
+    int i = 0;
     for (LatticeObject o : this) {
-      allPositions.add(getPosition(o));
+      allPositions[i] = getPosition(o);
+      i++;
     }
 
     return allPositions;

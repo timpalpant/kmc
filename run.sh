@@ -12,4 +12,4 @@ if [[ "$version" < "1.7" ]]; then
 fi
 
 # Run the simulation with the passed arguments
-java -Xmx2000m -Dlog4j.configuration=log4j.properties -cp $DIR:$DIR/build:$DIR/dist/*:$DIR/lib/* us.palpant.science.Simulate $@
+java -Xmx2000m -Dlog4j.configuration=log4j.properties -cp $DIR:$DIR/build:$DIR/dist/*:$DIR/lib/* us.palpant.science.$@
