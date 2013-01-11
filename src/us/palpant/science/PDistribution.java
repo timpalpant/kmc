@@ -35,7 +35,7 @@ public class PDistribution {
     double[] counts = null;
     int[] positions = null;
     try (TrajectoryReader reader = new TrajectoryReader(inputFile)) {
-      counts = new double[reader.getLatticeSize()];
+      counts = new double[reader.getLattice().size()];
       Frame frame = null;
       log.info("Accumulating counts");
       while ((frame = reader.readFrame()) != null) {

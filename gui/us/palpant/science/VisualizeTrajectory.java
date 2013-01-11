@@ -70,8 +70,9 @@ public class VisualizeTrajectory {
    * Initialize the contents of the frame.
    * 
    * @throws IOException
+   * @throws ClassNotFoundException 
    */
-  private void initialize() throws IOException {
+  private void initialize() throws IOException, ClassNotFoundException {
     frame.setBounds(100, 100, 800, 80);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -86,7 +87,7 @@ public class VisualizeTrajectory {
       e1.printStackTrace();
     }
     
-    latticePanel = new LatticePanel(reader.getLatticeSize(), nucSize);
+    latticePanel = new LatticePanel(reader.getLattice().size(), nucSize);
     frame.getContentPane().add(latticePanel, BorderLayout.CENTER);
 
     new javax.swing.Timer(30, new ActionListener() {

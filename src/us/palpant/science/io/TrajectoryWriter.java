@@ -2,13 +2,16 @@ package us.palpant.science.io;
 
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.log4j.Logger;
+
+import us.palpant.science.Lattice;
+import us.palpant.science.Parameters;
 
 /**
  * Write trajectory files, which are series of Frames
@@ -18,28 +21,25 @@ import org.apache.log4j.Logger;
 public class TrajectoryWriter implements Closeable {
   private static final Logger log = Logger.getLogger(TrajectoryWriter.class);
   
-  private final DataOutputStream os;
+  private final ObjectOutputStream os;
   
-  public TrajectoryWriter(OutputStream os, int latticeSize) throws IOException {
-    log.debug("Initialized output trajectory for lattice with "+latticeSize+" grid points");
-    this.os = new DataOutputStream(os);
-    this.os.writeInt(latticeSize);
+  public TrajectoryWriter(OutputStream os, Lattice lattice, Parameters params) throws IOException {
+    log.debug("Initialized output trajectory for lattice with "+lattice.size()+" grid points");
+    this.os = new ObjectOutputStream(os);
+    this.os.writeObject(lattice);
+    this.os.writeObject(params);
   }
   
-  public TrajectoryWriter(Path p, int latticeSize) throws IOException {
-    this(new BufferedOutputStream(Files.newOutputStream(p)), latticeSize);
+  public TrajectoryWriter(Path p, Lattice lattice, Parameters params) throws IOException {
+    this(new BufferedOutputStream(Files.newOutputStream(p)), lattice, params);
   }
   
   public void writeFrame(Frame frame) throws IOException {
-    writeFrame(frame.getTime(), frame.getPositions());
+    os.writeObject(frame);
   }
   
   public void writeFrame(double time, int[] positions) throws IOException {
-    os.writeDouble(time);
-    os.writeInt(positions.length);
-    for (int p : positions) {
-      os.writeInt(p);
-    }
+    writeFrame(new Frame(time, positions));
   }
 
   @Override

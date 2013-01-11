@@ -1,5 +1,9 @@
 package us.palpant.science;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -15,23 +19,25 @@ import us.palpant.science.objects.LatticeObject;
  * @author palpant
  * 
  */
-public class Lattice implements Iterable<LatticeObject> {
-  
+public class Lattice implements Iterable<LatticeObject>, Serializable {
+
+  private static final long serialVersionUID = 1L;
+
   private static final Logger log = Logger.getLogger(Lattice.class);
 
   /**
    * Potential energy for each point on the lattice
    */
-  private final double[] potential;
+  private double[] potential;
   /**
    * Boundary condition to use
    */
-  private final BoundaryCondition bc;
+  private BoundaryCondition bc;
   /**
    * Holds the set of LatticeObjects currently on the Lattice, sorted by
    * position
    */
-  private List<LatticeObject> objects = new ArrayList<>();
+  private transient List<LatticeObject> objects = new ArrayList<>();
 
   /**
    * Create a new Lattice of a given length
@@ -56,6 +62,24 @@ public class Lattice implements Iterable<LatticeObject> {
   public Lattice(final double[] potential, BoundaryCondition bc) {
     this.potential = potential;
     this.bc = bc;
+  }
+  
+  private void writeObject(ObjectOutputStream out) throws IOException {
+    out.writeObject(bc);
+    out.writeInt(potential.length);
+    for (double v : potential) {
+      out.writeDouble(v);
+    }
+  }
+  
+  private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+    bc = (BoundaryCondition) in.readObject();
+    int size = in.readInt();
+    potential = new double[size];
+    for (int i = 0; i < size; i++) {
+      potential[i] = in.readDouble();
+    }
+    objects = new ArrayList<>();
   }
 
   @Override

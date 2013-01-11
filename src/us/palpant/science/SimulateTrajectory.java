@@ -13,7 +13,10 @@ import java.util.Random;
 
 import org.apache.log4j.Logger;
 
+import us.palpant.science.io.Frame;
+import us.palpant.science.io.TrajectoryReader;
 import us.palpant.science.io.TrajectoryWriter;
+import us.palpant.science.objects.FixedWidthObject;
 import us.palpant.science.transitions.Transition;
 
 import com.beust.jcommander.JCommander;
@@ -33,15 +36,18 @@ public class SimulateTrajectory {
   @Parameter(names = { "-i", "--potential" }, description = "Input file with potential energy landscape", 
              converter = PathConverter.class, validateWith = ReadablePathValidator.class)
   private Path potentialEnergyFile;
+  @Parameter(names = { "-x", "--extend" }, description = "Extend a previous trajectory", 
+      converter = PathConverter.class, validateWith = ReadablePathValidator.class)
+  private Path extend;
   @Parameter(names = { "-l", "--length" }, description = "Length of lattice to simulate, if potential is not provided")
   private int latticeLength = 5000;
-  @Parameter(names = { "--veff" }, description = "If potential is not provided, initialize flat potential with this value")
+  @Parameter(names = { "-v", "--veff" }, description = "If potential is not provided, initialize flat potential with this value")
   private double vEff = 0;
-  @Parameter(names = { "-t", "--time" }, description = "Length of time to simulate (min)", required = true)
+  @Parameter(names = { "-t", "--tfinal" }, description = "Length of time to simulate (min)", required = true)
   private double tFinal;
   @Parameter(names = {"-p", "--periodic"}, description = "Use periodic boundary conditions")
   private boolean periodic = false;
-  @Parameter(names = { "--seed" }, description = "Seed for random number generator")
+  @Parameter(names = { "-s", "--seed" }, description = "Seed for random number generator")
   private long seed = 123456789;
   @Parameter(names = { "-o", "--output" }, description = "Output trajectory with Lattice configuration at each timestep", 
              converter = PathConverter.class, required = true)
@@ -50,7 +56,9 @@ public class SimulateTrajectory {
   /**
    * Simulation parameters
    */
-  private final Parameters params;
+  private Lattice lattice;
+  private Parameters params;
+  double t = 0;
   public static final int NUM_CHECKPOINTS = 10;
   
   private SimulateTrajectory(Parameters params) {
@@ -69,9 +77,12 @@ public class SimulateTrajectory {
         }
       }
       potential = new double[v.size()];
+      double total = 0;
       for (int i = 0; i < v.size(); i++) {
         potential[i] = v.get(i);
+        total += potential[i];
       }
+      log.info("Mean of potential landscape = "+total/potential.length);
     } else {
       log.info("Creating flat potential energy landscape with length = "+latticeLength+" and value = "+vEff);
       potential = new double[latticeLength];
@@ -86,11 +97,32 @@ public class SimulateTrajectory {
   }
 
   private Lattice initLattice() throws IOException {
-    log.info("Using " + getBoundaryCondition().toString() + " boundary conditions");
-    return new Lattice(loadPotential(), getBoundaryCondition());
+    if (extend != null) {
+      log.info("Extending previous trajectory");
+      try (TrajectoryReader reader = new TrajectoryReader(extend)) {
+        params = reader.getParams();
+        lattice = reader.getLattice();
+        Frame frame = null, lastFrame = null;
+        while ((frame = reader.readFrame()) != null) {
+          lastFrame = frame;
+        }
+        t = lastFrame.getTime();
+        for (int pos : lastFrame.getPositions()) {
+          lattice.addObject(new FixedWidthObject(lattice, pos, params.getNucSize()));
+        }
+      } catch (ClassNotFoundException e) {
+        e.printStackTrace();
+        log.fatal("Error extending trajectory");
+        throw new RuntimeException("Could not extend previous trajectory");
+      }
+    } else {
+      lattice = new Lattice(loadPotential(), getBoundaryCondition());
+    }
+    
+    return lattice;
   }
 
-  private TransitionManager initTransitionManager(Lattice lattice) {
+  private TransitionManager initTransitionManager() {
     return new RemodelerTransitionManager(lattice, params);
   }
 
@@ -101,19 +133,19 @@ public class SimulateTrajectory {
    * @throws IOException
    */
   private void run() throws IOException {
-    log.info("Simulation parameters: " + params.toString());
     Lattice lattice = initLattice();
-    TransitionManager manager = initTransitionManager(lattice);
+    log.info("Simulation parameters: " + params.toString());
+    log.info("Using " + lattice.getBoundaryCondition().toString() + " boundary conditions");
+    TransitionManager manager = initTransitionManager();
     log.info("Seed = " + seed);
     Random rng = new Random(seed);
-    double t = 0;
 
     log.info("Beginning simulation");
     double u1, u2;
     Collection<Transition> allTransitions = manager.getAllTransitions();
     double rateTotal = TransitionManager.getRateTotal(allTransitions);
-    double nextCheckpoint = tFinal / NUM_CHECKPOINTS;
-    try (TrajectoryWriter writer = new TrajectoryWriter(outputFile, lattice.size())) {
+    double nextCheckpoint = (tFinal - t) / NUM_CHECKPOINTS;
+    try (TrajectoryWriter writer = new TrajectoryWriter(outputFile, lattice, params)) {
       while (t < tFinal) {
         if (log.isDebugEnabled()) {
           log.debug("Time t = " + t + ", lattice has " + lattice.numObjects() + " objects");
