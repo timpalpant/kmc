@@ -41,22 +41,28 @@ public abstract class TransitionManager {
    * @param u a random variable, uniformly distributed \in [0,1]
    * @return the randomly selected Transition corresponding to u
    */
-  public static Transition getTransition(Collection<? extends Transition> transitions, double u) {
+  public static Transition getTransition(Collection<? extends Transition> transitions, double rateTotal, double u) {
     if (u < 0 || u > 1) {
       throw new IllegalArgumentException("u must be in [0,1]! (u = " + u + ")");
     }
 
-    double selected = u * getRateTotal(transitions);
+    double selected = u * rateTotal;
     double cumulative = 0;
     for (Transition t : transitions) {
       cumulative += t.getRate();
       if (cumulative >= selected) {
-        log.debug("Selected random transition: " + t);
+        if (log.isDebugEnabled()) {
+          log.debug("Selected random transition: " + t);
+        }
         return t;
       }
     }
 
     throw new RuntimeException("Error selecting transition!");
+  }
+  
+  public static Transition getTransition(Collection<? extends Transition> transitions, double u) {
+    return getTransition(transitions, getRateTotal(transitions), u);
   }
 
   /**
@@ -69,7 +75,9 @@ public abstract class TransitionManager {
     for (Transition t : transitions) {
       total += t.getRate();
     }
-    log.debug(transitions.size() + " transitions with total rate = " + total);
+    if (log.isDebugEnabled()) {
+      log.debug(transitions.size() + " transitions with total rate = " + total);
+    }
     return total;
   }
 }

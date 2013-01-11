@@ -1,5 +1,22 @@
 #!/usr/bin/env bash
 
+if [ $# -eq 0 ]
+then
+  echo "USAGE: run.sh APPNAME [ARGS]";
+  echo "To list available tools: run.sh list";
+  exit
+fi
+
+if [ "$1" = "list" ]
+then
+  echo SimulateTrajectory
+  echo VisualizeTrajectory 
+  echo TrajectoryToAscii 
+  echo PDistribution 
+  echo LinkerDistribution
+  exit
+fi
+
 # Get the root directory in case this script is being called from elsewhere
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 

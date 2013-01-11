@@ -109,26 +109,29 @@ public class SimulateTrajectory {
     double t = 0;
 
     log.info("Beginning simulation");
-    double u1, u2, tao;
+    double u1, u2;
     Collection<Transition> allTransitions = manager.getAllTransitions();
+    double rateTotal = TransitionManager.getRateTotal(allTransitions);
     double nextCheckpoint = tFinal / NUM_CHECKPOINTS;
     try (TrajectoryWriter writer = new TrajectoryWriter(outputFile, lattice.size())) {
       while (t < tFinal) {
-        log.debug("Time t = " + t + ", lattice has " + lattice.numObjects() + " objects");
+        if (log.isDebugEnabled()) {
+          log.debug("Time t = " + t + ", lattice has " + lattice.numObjects() + " objects");
+        }
         writer.writeFrame(t, lattice.getAllPositions());
 
         // Randomly choose a transition to carry out
         u1 = rng.nextDouble();
-        Transition transition = TransitionManager.getTransition(allTransitions, u1);
-
+        Transition transition = TransitionManager.getTransition(allTransitions, rateTotal, u1);
+        
         // Carry out the event
         transition.perform();
 
         // Update the time
         u2 = rng.nextDouble();
         allTransitions = manager.getAllTransitions();
-        tao = -Math.log(u2) / TransitionManager.getRateTotal(allTransitions);
-        t += tao;
+        rateTotal = TransitionManager.getRateTotal(allTransitions);
+        t -= Math.log(u2) / rateTotal;
         
         if (t > nextCheckpoint) {
           log.info(String.format("%2.0f", 100*t/tFinal) + "% complete");

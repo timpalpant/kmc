@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 import us.palpant.science.objects.LatticeObject;
 import us.palpant.science.transitions.SlideTransition;
 import us.palpant.science.transitions.Transition;
@@ -18,8 +16,8 @@ import us.palpant.science.transitions.Transition;
  * 
  */
 public class RemodelerTransitionManager extends StatisticalPositioningTransitionManager {
-
-  private static final Logger log = Logger.getLogger(RemodelerTransitionManager.class);
+  
+  private List<SlideTransition> remodelerTransitions = new ArrayList<>();
 
   public RemodelerTransitionManager(Lattice lattice, Parameters params) {
     super(lattice, params);
@@ -28,15 +26,7 @@ public class RemodelerTransitionManager extends StatisticalPositioningTransition
   @Override
   public List<Transition> getAllTransitions() {
     List<Transition> allTransitions = super.getAllTransitions();
-    double thermalRateTotal = getRateTotal(allTransitions);
-
-    List<SlideTransition> remodelerTransitions = getRemodelerSlideTransitions();
-    double remodelerRateTotal = getRateTotal(remodelerTransitions);
-    allTransitions.addAll(remodelerTransitions);
-
-    double rateTotal = thermalRateTotal + remodelerRateTotal;
-    log.debug("Transition probabilities: thermal = " + 100 * thermalRateTotal / rateTotal + " remodeler = " + 100
-        * remodelerRateTotal / rateTotal);
+    allTransitions.addAll(getRemodelerSlideTransitions());
     return allTransitions;
   }
 
@@ -44,33 +34,31 @@ public class RemodelerTransitionManager extends StatisticalPositioningTransition
    * @return a List of SlideTransitions due to remodeling activity
    */
   public List<SlideTransition> getRemodelerSlideTransitions() {
-    List<SlideTransition> transitions = new ArrayList<SlideTransition>();
+    remodelerTransitions.clear();
 
     int start = 0, linker = 0;
     int end = lattice.size();
     Iterator<LatticeObject> it = lattice.iterator();
     if (it.hasNext()) {
       LatticeObject object = it.next();
-      int pos = lattice.getPosition(object);
-      int low = object.low(pos);
-      int high = object.high(pos);
+      int pos = object.getPos();
+      int low = object.low();
+      int high = object.high();
 
       if (lattice.getBoundaryCondition() == Lattice.BoundaryCondition.PERIODIC) {
         LatticeObject last = lattice.last();
-        int lastPos = lattice.getPosition(last);
-        int lastHigh = last.high(lastPos);
+        int lastPos = last.getPos();
+        int lastHigh = last.high();
         if (low <= 0) {
           linker = lattice.getPeriodicWrap(low) - lastHigh;
           if (linker >= params.getLMin()) {
-            transitions.add(new SlideTransition(lattice, object, pos - params.getRemodelerStepSize(),
-                getRateForLinker(linker)));
+            remodelerTransitions.add(new SlideTransition(object, pos-params.getRemodelerStepSize(), getRateForLinker(linker)));
           }
         }
         if (lastHigh + 1 >= end) {
           linker = low - lattice.getPeriodicWrap(lastHigh);
           if (linker <= params.getLMin()) {
-            transitions.add(new SlideTransition(lattice, last, lastPos + params.getRemodelerStepSize(),
-                getRateForLinker(linker)));
+            remodelerTransitions.add(new SlideTransition(last, lastPos+params.getRemodelerStepSize(), getRateForLinker(linker)));
           }
         }
       }
@@ -79,41 +67,37 @@ public class RemodelerTransitionManager extends StatisticalPositioningTransition
         // Slide left
         linker = low - start;
         if (linker >= params.getLMin()) {
-          transitions.add(new SlideTransition(lattice, object, pos - params.getRemodelerStepSize(),
-              getRateForLinker(linker)));
+          remodelerTransitions.add(new SlideTransition(object, pos-params.getRemodelerStepSize(), getRateForLinker(linker)));
         }
         start = high;
 
         if (it.hasNext()) {
           LatticeObject next = it.next();
-          int nPos = lattice.getPosition(next);
-          low = next.low(nPos);
+          int nPos = next.getPos();
+          low = next.low();
           // Slide right
           linker = low - high;
           if (linker >= params.getLMin()) {
-            transitions.add(new SlideTransition(lattice, object, pos + params.getRemodelerStepSize(),
-                getRateForLinker(linker)));
+            remodelerTransitions.add(new SlideTransition(object, pos+params.getRemodelerStepSize(), getRateForLinker(linker)));
           }
           object = next;
           pos = nPos;
-          high = next.high(nPos);
+          high = next.high();
         }
       } while (it.hasNext());
 
       // The last nucleosome
       linker = low - start;
       if (linker >= params.getLMin()) {
-        transitions.add(new SlideTransition(lattice, object, pos - params.getRemodelerStepSize(),
-            getRateForLinker(linker)));
+        remodelerTransitions.add(new SlideTransition(object, pos-params.getRemodelerStepSize(), getRateForLinker(linker)));
       }
       linker = end - high;
       if (linker >= params.getLMin()) {
-        transitions.add(new SlideTransition(lattice, object, pos + params.getRemodelerStepSize(),
-            getRateForLinker(linker)));
+        remodelerTransitions.add(new SlideTransition(object, pos+params.getRemodelerStepSize(), getRateForLinker(linker)));
       }
     }
 
-    return transitions;
+    return remodelerTransitions;
   }
 
   private double getRateForLinker(int linker) {

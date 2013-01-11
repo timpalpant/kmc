@@ -1,11 +1,9 @@
 package us.palpant.science;
 
-import java.util.Comparator;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.TreeSet;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -18,6 +16,7 @@ import us.palpant.science.objects.LatticeObject;
  * 
  */
 public class Lattice implements Iterable<LatticeObject> {
+  
   private static final Logger log = Logger.getLogger(Lattice.class);
 
   /**
@@ -29,14 +28,10 @@ public class Lattice implements Iterable<LatticeObject> {
    */
   private final BoundaryCondition bc;
   /**
-   * Stores the position of LatticeObjects currently on the Lattice
-   */
-  private Map<LatticeObject, Integer> positions = new HashMap<LatticeObject, Integer>();
-  /**
    * Holds the set of LatticeObjects currently on the Lattice, sorted by
    * position
    */
-  private TreeSet<LatticeObject> objects = new TreeSet<LatticeObject>(new PositionComparator());
+  private List<LatticeObject> objects = new ArrayList<>();
 
   /**
    * Create a new Lattice of a given length
@@ -67,35 +62,32 @@ public class Lattice implements Iterable<LatticeObject> {
   public Iterator<LatticeObject> iterator() {
     return objects.iterator();
   }
+  
+  public void sort() {
+    log.debug("Sorting Lattice");
+    Collections.sort(objects);
+  }
 
   /**
    * @return the first object in the Lattice
    */
   public LatticeObject first() {
-    return objects.first();
+    if (objects.size() > 0) {
+      return objects.get(0);
+    }
+    
+    return null;
   }
 
   /**
    * @return the last object in the Lattice
    */
   public LatticeObject last() {
-    return objects.last();
-  }
-
-  public LatticeObject lower(LatticeObject object) {
-    return objects.lower(object);
-  }
-
-  public LatticeObject higher(LatticeObject object) {
-    return objects.higher(object);
-  }
-
-  public LatticeObject floor(LatticeObject object) {
-    return objects.floor(object);
-  }
-
-  public LatticeObject ceiling(LatticeObject object) {
-    return objects.ceiling(object);
+    if (objects.size() > 0) {
+      return objects.get(objects.size()-1);
+    }
+    
+    return null;
   }
 
   /**
@@ -104,10 +96,9 @@ public class Lattice implements Iterable<LatticeObject> {
    * @param object
    *          the LatticeObject to add
    */
-  public void addObject(LatticeObject object, int pos) {
-    positions.put(object, getPeriodicWrap(pos));
+  public void addObject(LatticeObject object) {
     objects.add(object);
-    checkCollisions(object);
+    sort();
   }
 
   /**
@@ -118,7 +109,6 @@ public class Lattice implements Iterable<LatticeObject> {
    */
   public void removeObject(LatticeObject object) {
     objects.remove(object);
-    positions.remove(object);
   }
 
   /**
@@ -139,44 +129,11 @@ public class Lattice implements Iterable<LatticeObject> {
     int[] allPositions = new int[numObjects()];
     int i = 0;
     for (LatticeObject o : this) {
-      allPositions[i] = getPosition(o);
+      allPositions[i] = o.getPos();
       i++;
     }
 
     return allPositions;
-  }
-
-  /**
-   * Get the position of a LatticeObject on the Lattice
-   * 
-   * @param object
-   *          the object of interest
-   * @return the position of the object on the lattice
-   */
-  public Integer getPosition(LatticeObject object) {
-    return positions.get(object);
-  }
-
-  /**
-   * Update the position of a LatticeObject in the Lattice
-   * 
-   * @param object
-   *          the LatticeObject to move
-   * @param pos
-   *          the new position of the LatticeObject in the Lattice
-   * @throws NoSuchElementException
-   *           if the object is not already in the Lattice. Use addObject() to
-   *           add a new LatticeObject to the Lattice
-   */
-  public void setPosition(LatticeObject object, int pos) throws NoSuchElementException {
-    if (!objects.contains(object)) {
-      throw new NoSuchElementException("Cannot update the position of an object not in the Lattice!");
-    }
-
-    // It is necessary to remove and re-add the object
-    // to maintain the sort order of the TreeSet
-    objects.remove(object);
-    addObject(object, pos);
   }
 
   /**
@@ -216,79 +173,6 @@ public class Lattice implements Iterable<LatticeObject> {
     }
 
     return pos;
-  }
-
-  /**
-   * Check for collisions involving a LatticeObject
-   * 
-   * @param object
-   *          the reference LatticeObject
-   * @return true if there are collisions involving this LatticeObject
-   */
-  private boolean checkCollisions(LatticeObject object) {
-    int pos = getPosition(object);
-    int low = object.low(pos);
-    int high = object.high(pos);
-
-    // Only need to check closest LatticeObject on either side of pos
-    LatticeObject lower = objects.lower(object);
-    if (lower != null && lower.high(getPosition(lower)) >= low) {
-      log.warn("Collision detected between " + object + " and " + lower);
-      return true;
-    }
-    LatticeObject higher = objects.higher(object);
-    if (higher != null && higher.low(getPosition(higher)) <= high) {
-      log.warn("Collision detected between " + object + " and " + higher);
-      return true;
-    }
-    // If periodic BoundaryConditions and the new object is on the end, check
-    // wrapped collision
-    if (getBoundaryCondition() == BoundaryCondition.PERIODIC) {
-      if (low < 0) {
-        LatticeObject last = objects.last();
-        if (object != last) {
-          if (last.high(getPosition(last)) >= getPeriodicWrap(low)) {
-            log.warn("Periodic collision detected between " + object + " and " + last);
-            return true;
-          }
-        }
-      }
-      if (high >= size()) {
-        LatticeObject first = objects.first();
-        if (object != first) {
-          if (getPeriodicWrap(high) >= first.low(getPosition(first))) {
-            log.warn("Periodic collision detected between " + object + " and " + first);
-            return true;
-          }
-        }
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * Compare objects by their position in the lattice
-   * 
-   * @author timpalpant
-   * 
-   */
-  private class PositionComparator implements Comparator<LatticeObject> {
-
-    @Override
-    public int compare(LatticeObject o1, LatticeObject o2) {
-      if (!positions.containsKey(o1)) {
-        throw new IllegalArgumentException("Cannot compare position of object " + o1 + " not in lattice");
-      }
-      if (!positions.containsKey(o2)) {
-        throw new IllegalArgumentException("Cannot compare position of object " + o2 + " not in lattice");
-      }
-
-      int pos1 = positions.get(o1);
-      int pos2 = positions.get(o2);
-      return Integer.compare(pos1, pos2);
-    }
-
   }
 
   /**
