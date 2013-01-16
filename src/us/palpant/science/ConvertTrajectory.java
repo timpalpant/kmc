@@ -1,44 +1,42 @@
 package us.palpant.science;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.log4j.Logger;
 
+import us.palpant.science.io.AsciiTrajectoryWriter;
 import us.palpant.science.io.Frame;
 import us.palpant.science.io.BinaryTrajectoryReader;
 import us.palpant.science.io.TrajectoryReader;
+import us.palpant.science.io.TrajectoryWriter;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
-public class CountObjectsVsTime {
+public class ConvertTrajectory {
 
-  private static final Logger log = Logger.getLogger(CountObjectsVsTime.class);
+  private static final Logger log = Logger.getLogger(ConvertTrajectory.class);
   
   @Parameter(names = { "-i", "--input" }, description = "Input trajectory", 
       required = true, converter = PathConverter.class, validateWith = ReadablePathValidator.class)
   public Path inputFile;
-  @Parameter(names = { "-o", "--output" }, description = "Output file with number of objects at each time", 
+  @Parameter(names = { "-o", "--output" }, description = "Output ASCII trajectory", 
       required = true, converter = PathConverter.class)
   public Path outputFile;
   
   private void run() throws IOException, ClassNotFoundException {
     log.info("Opening trajectory");
-    int count = 0;
     try (TrajectoryReader reader = new BinaryTrajectoryReader(inputFile);
-         PrintWriter writer = new PrintWriter(Files.newBufferedWriter(outputFile, Charset.defaultCharset()))) {
+         TrajectoryWriter writer = new AsciiTrajectoryWriter(outputFile)) {
+      log.info("Translating...");
       Frame frame = null;
       while ((frame = reader.readFrame()) != null) {
-        writer.println(frame.getTime()+"\t"+frame.getPositions().length);
-        count++;
-      } 
+        writer.writeFrame(frame);
+      }
+      log.info("Wrote "+writer.getNumFrames()+" frames");
     }
-    log.info("Processed "+count+" frames");
   }
   
   /**
@@ -47,10 +45,10 @@ public class CountObjectsVsTime {
    * @throws ClassNotFoundException 
    */
   public static void main(String[] args) throws ClassNotFoundException, IOException {
-    CountObjectsVsTime app = new CountObjectsVsTime();
+    ConvertTrajectory app = new ConvertTrajectory();
     // Initialize the command-line options parser
     JCommander jc = new JCommander(app);
-    jc.setProgramName("CountObjectsVersusTime");
+    jc.setProgramName("ConvertTrajectory");
 
     try {
       jc.parse(args);

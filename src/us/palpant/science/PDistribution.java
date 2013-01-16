@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import org.apache.log4j.Logger;
 
 import us.palpant.science.io.Frame;
-import us.palpant.science.io.TrajectoryReader;
+import us.palpant.science.io.BinaryTrajectoryReader;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -18,6 +18,7 @@ import com.beust.jcommander.ParameterException;
 public class PDistribution {
 
   private static final Logger log = Logger.getLogger(PDistribution.class);
+  public static final int PROGRESS = 1_000_000;
 
   @Parameter(names = { "-i", "--input" }, 
       description = "Input trajectory", required = true, 
@@ -30,11 +31,10 @@ public class PDistribution {
 
   private void run() throws IOException, ClassNotFoundException {
     log.info("Opening trajectory");
-    int numFrames = 0;
     double prevTime = 0, time = 0, dt;
     double[] counts = null;
     int[] positions = null;
-    try (TrajectoryReader reader = new TrajectoryReader(inputFile)) {
+    try (BinaryTrajectoryReader reader = new BinaryTrajectoryReader(inputFile)) {
       counts = new double[reader.getLattice().size()];
       Frame frame = null;
       log.info("Accumulating counts");
@@ -48,10 +48,12 @@ public class PDistribution {
         }
         prevTime = time;
         positions = frame.getPositions();
-        numFrames++;
+        if (reader.getCurrentFrameNumber() % PROGRESS == 0) {
+          log.info(String.format("Processed %d frames", reader.getCurrentFrameNumber()));
+        }
       }
+      log.info(String.format("Processed %d frames", reader.getCurrentFrameNumber()));
     }
-    log.info("Processed " + numFrames + " frames");
     
     log.info("Writing probabilities to output");
     try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(outputFile, Charset.defaultCharset()))) {

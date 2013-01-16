@@ -11,7 +11,7 @@ if [ "$1" = "list" ]
 then
   echo SimulateTrajectory
   echo VisualizeTrajectory 
-  echo TrajectoryToAscii 
+  echo ConvertTrajectory 
   echo PDistribution 
   echo LinkerDistribution
   exit

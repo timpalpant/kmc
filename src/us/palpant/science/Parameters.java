@@ -23,7 +23,7 @@ public class Parameters implements Serializable {
   private int remodelerStepSize = 13;
   @Parameter(names = { "--k0" }, description = "Remodeler base rate (min^-1)")
   public double k0 = 0.0059 * 2 / 2.11;
-  @Parameter(names = { "--linker-dependent" }, description = "Use linker-dependent remodeler rate")
+  @Parameter(names = { "--linker-dependent" }, arity=1, description = "Use linker-dependent remodeler rate")
   private boolean linkerDependentRate = true;
   @Parameter(names = { "--a" }, description = "Remodeler exponential linker constant")
   private double a = 0.0911;

@@ -14,7 +14,8 @@ import java.util.Random;
 import org.apache.log4j.Logger;
 
 import us.palpant.science.io.Frame;
-import us.palpant.science.io.TrajectoryReader;
+import us.palpant.science.io.BinaryTrajectoryReader;
+import us.palpant.science.io.BinaryTrajectoryWriter;
 import us.palpant.science.io.TrajectoryWriter;
 import us.palpant.science.objects.FixedWidthObject;
 import us.palpant.science.transitions.Transition;
@@ -43,7 +44,7 @@ public class SimulateTrajectory {
   private int latticeLength = 5000;
   @Parameter(names = { "-v", "--veff" }, description = "If potential is not provided, initialize flat potential with this value")
   private double vEff = 0;
-  @Parameter(names = { "-t", "--tfinal" }, description = "Length of time to simulate (min)", required = true)
+  @Parameter(names = { "-t", "--tfinal" }, description = "Simulation end time (min)", required = true)
   private double tFinal;
   @Parameter(names = {"-p", "--periodic"}, description = "Use periodic boundary conditions")
   private boolean periodic = false;
@@ -58,8 +59,9 @@ public class SimulateTrajectory {
    */
   private Lattice lattice;
   private Parameters params;
-  double t = 0;
-  public static final int NUM_CHECKPOINTS = 10;
+  double t0 = 0;
+  
+  public static final int PROGRESS = 200_000;
   
   private SimulateTrajectory(Parameters params) {
 	  this.params = params;
@@ -99,14 +101,14 @@ public class SimulateTrajectory {
   private Lattice initLattice() throws IOException {
     if (extend != null) {
       log.info("Extending previous trajectory");
-      try (TrajectoryReader reader = new TrajectoryReader(extend)) {
+      try (BinaryTrajectoryReader reader = new BinaryTrajectoryReader(extend)) {
         params = reader.getParams();
         lattice = reader.getLattice();
         Frame frame = null, lastFrame = null;
         while ((frame = reader.readFrame()) != null) {
           lastFrame = frame;
         }
-        t = lastFrame.getTime();
+        t0 = lastFrame.getTime();
         for (int pos : lastFrame.getPositions()) {
           lattice.addObject(new FixedWidthObject(lattice, pos, params.getNucSize()));
         }
@@ -141,11 +143,11 @@ public class SimulateTrajectory {
     Random rng = new Random(seed);
 
     log.info("Beginning simulation");
-    double u1, u2;
+    double t = t0, u1, u2;
     Collection<Transition> allTransitions = manager.getAllTransitions();
     double rateTotal = TransitionManager.getRateTotal(allTransitions);
-    double nextCheckpoint = (tFinal - t) / NUM_CHECKPOINTS;
-    try (TrajectoryWriter writer = new TrajectoryWriter(outputFile, lattice, params)) {
+    long start = System.currentTimeMillis();
+    try (TrajectoryWriter writer = new BinaryTrajectoryWriter(outputFile, lattice, params)) {
       while (t < tFinal) {
         if (log.isDebugEnabled()) {
           log.debug("Time t = " + t + ", lattice has " + lattice.numObjects() + " objects");
@@ -165,9 +167,11 @@ public class SimulateTrajectory {
         rateTotal = TransitionManager.getRateTotal(allTransitions);
         t -= Math.log(u2) / rateTotal;
         
-        if (t > nextCheckpoint) {
-          log.info(String.format("%2.0f", 100*t/tFinal) + "% complete");
-          nextCheckpoint += tFinal / NUM_CHECKPOINTS;
+        if (writer.getNumFrames() % PROGRESS == 0) {
+          double speed = 60 * 1_000 * (t - t0) / (System.currentTimeMillis() - start);
+          log.info(String.format("Written %d frames, %2.1f%% complete (%2.0f min chemical time / min)", 
+              writer.getNumFrames(), 100*t/tFinal, speed));
+          start = System.currentTimeMillis();
         }
       }
     }

@@ -16,14 +16,14 @@ import java.io.IOException;
 import java.nio.file.Path;
 
 import us.palpant.science.io.Frame;
-import us.palpant.science.io.TrajectoryReader;
+import us.palpant.science.io.BinaryTrajectoryReader;
 
 public class VisualizeTrajectory {
 
   private JFrame frame = new JFrame();
   JProgressBar progressBar = new JProgressBar();
   private LatticePanel latticePanel;
-  private TrajectoryReader reader;
+  private BinaryTrajectoryReader reader;
   private boolean finished = false;
   private Frame nextFrame;
   private double t = 0;
@@ -33,8 +33,10 @@ public class VisualizeTrajectory {
   public Path inputFile;
   @Parameter(names = { "-n", "--nuc-size" }, description = "Nucleosome size (bp)")
   public int nucSize = 147;
-  @Parameter(names = { "-t", "--time" }, description = "Length of time to simulate", required = true)
+  @Parameter(names = { "-t", "--time" }, description = "Final time", required = true)
   public double tFinal;
+  @Parameter(names = { "-s", "--speed" }, description = "Simulation speed")
+  public double speed = 1;
 
   /**
    * Launch the application.
@@ -79,7 +81,7 @@ public class VisualizeTrajectory {
     progressBar.setMaximum((int) (100*tFinal));
     frame.getContentPane().add(progressBar, BorderLayout.SOUTH);
 
-    reader = new TrajectoryReader(inputFile);
+    reader = new BinaryTrajectoryReader(inputFile);
     try {
       nextFrame = reader.readFrame();
     } catch (ClassNotFoundException e1) {
@@ -99,7 +101,7 @@ public class VisualizeTrajectory {
 
   private void loop() {
     if (!finished) {
-      t += tFinal / 2000;
+      t += speed * tFinal / 2000;
       progressBar.setValue((int) (100*t));
       if (t >= tFinal) {
         finished = true;
