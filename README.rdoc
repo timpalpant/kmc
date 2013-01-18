@@ -1,0 +1,22 @@
+# List all available commands
+./run.sh list
+
+# Simulate a 90 minute trajectory on a flat, 5000bp landscape with V = 0
+./run.sh SimulateTrajectory -l 5000 -o remodeler.trj -t 90
+# Simulate the same trajectory with only statistical positioning (no remodeling)
+./run.sh SimulateTrajectory -l 5000 -o statistical.trj -t 90 --k0 0
+
+# View the trajectories
+./run.sh VisualizeTrajectory -i remodeler.trj -t 90
+./run.sh VisualizeTrajectory -i statistical.trj -t 90
+
+# Collect the probability distribution of nucleosome positions
+./run.sh PDistribution -i remodeler.trj -o remodeler.p.txt
+./run.sh PDistribution -i statistical.trj -o statistical.p.txt
+
+# Collect the distribution of linker lengths
+./run.sh LinkerDistribution -i remodeler.trj -o remodeler.linker.txt
+./run.sh LinkerDistribution -i statistical.trj -o statistical.linker.txt
+
+# Convert a trajectory into an ASCII format for easy analysis
+./run.sh ConvertTrajectory -i remodeler.trj -o remodeler.trj.txt

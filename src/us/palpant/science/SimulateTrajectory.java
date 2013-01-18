@@ -37,6 +37,9 @@ public class SimulateTrajectory {
   @Parameter(names = { "-i", "--potential" }, description = "Input file with potential energy landscape", 
              converter = PathConverter.class, validateWith = ReadablePathValidator.class)
   private Path potentialEnergyFile;
+  @Parameter(names = { "-f", "--frame" }, description = "Initial conditions for the lattice", 
+      converter = PathConverter.class, validateWith = ReadablePathValidator.class)
+  private Path frame;
   @Parameter(names = { "-x", "--extend" }, description = "Extend a previous trajectory", 
       converter = PathConverter.class, validateWith = ReadablePathValidator.class)
   private Path extend;
@@ -50,6 +53,8 @@ public class SimulateTrajectory {
   private boolean periodic = false;
   @Parameter(names = { "-s", "--seed" }, description = "Seed for random number generator")
   private long seed = 123456789;
+  @Parameter(names = {"--preset"}, description = "Use a preset configuration (Florescu, Remodeler, Statistical)")
+  private String preset;
   @Parameter(names = { "-o", "--output" }, description = "Output trajectory with Lattice configuration at each timestep", 
              converter = PathConverter.class, required = true)
   private Path outputFile;
@@ -88,7 +93,7 @@ public class SimulateTrajectory {
     } else {
       log.info("Creating flat potential energy landscape with length = "+latticeLength+" and value = "+vEff);
       potential = new double[latticeLength];
-      Arrays.fill(potential, vEff * params.getBeta());
+      Arrays.fill(potential, vEff);
     }
 
     return potential;
@@ -119,6 +124,17 @@ public class SimulateTrajectory {
       }
     } else {
       lattice = new Lattice(loadPotential(), getBoundaryCondition());
+      if (frame != null) {
+        log.info("Setting initial conditions of the lattice");
+        try (BufferedReader reader = Files.newBufferedReader(frame, Charset.defaultCharset())) {
+          String line = reader.readLine();
+          String[] entry = line.split("\t");
+          t0 = Double.parseDouble(entry[0]);
+          for(String pos : entry[1].split(",")) {
+            lattice.addObject(new FixedWidthObject(lattice, Integer.valueOf(pos), params.getNucSize()));
+          }
+        }
+      }
     }
     
     return lattice;
@@ -129,8 +145,8 @@ public class SimulateTrajectory {
   }
 
   /**
-   * The main loop for the simulation Simulates up to tFinal, optionally
-   * collecting statistics throughout the simulation
+   * The main loop for the simulation Simulates up to tFinal,
+   * and writes a trajectory of all events
    * 
    * @throws IOException
    */

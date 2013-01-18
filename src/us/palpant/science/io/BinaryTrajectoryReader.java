@@ -1,17 +1,11 @@
 package us.palpant.science.io;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.nio.charset.Charset;
-import java.nio.charset.MalformedInputException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -27,38 +21,23 @@ public class BinaryTrajectoryReader implements TrajectoryReader {
   private static final Logger log = Logger.getLogger(BinaryTrajectoryReader.class);
   public static final String INDEX_EXTENSION = ".idx";
   
-  private ObjectInputStream is;
-  private Lattice lattice;
-  private Parameters params;
+  private final ObjectInputStream is;
+  private final Lattice lattice;
+  private final Parameters params;
   private TrajectoryIndex index;
   private int currentFrame = 0;
   private boolean eof = false;
-  private List<Path> trajectories = new ArrayList<>();
   
   public BinaryTrajectoryReader(Path p) throws IOException, ClassNotFoundException {
-    try (BufferedReader reader = Files.newBufferedReader(p, Charset.defaultCharset())) {
-      String line = null;
-      while ((line = reader.readLine()) != null) {
-        trajectories.add(Paths.get(line));
-      }
-    } catch (MalformedInputException e) {
-      trajectories.clear();
-      trajectories.add(p);
-    }
-    
-    init(trajectories.remove(0));
-  }
-  
-  private void init(Path p) throws IOException, ClassNotFoundException {
     is = new ObjectInputStream(new BufferedInputStream(Files.newInputStream(p)));
     lattice = (Lattice) this.is.readObject();
+    log.debug("Trajectory lattice has "+lattice.size()+" grid points");
     params = (Parameters) this.is.readObject();
     // Look for an index
     Path indexFile = p.resolveSibling(p.getFileName()+INDEX_EXTENSION);
     if (Files.isReadable(indexFile)) {
       index = TrajectoryIndex.load(indexFile);
     }
-    log.debug("Initialized trajectory for lattice with "+lattice.size()+" grid points");
   }
 
   /* (non-Javadoc)
@@ -80,10 +59,6 @@ public class BinaryTrajectoryReader implements TrajectoryReader {
         eof = true;
         close();
       }
-    } else if (trajectories.size() > 0) {
-      init(trajectories.remove(0));
-      eof = false;
-      return readFrame();
     }
     
     return null;

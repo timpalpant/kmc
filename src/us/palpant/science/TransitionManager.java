@@ -45,6 +45,9 @@ public abstract class TransitionManager {
     if (u < 0 || u > 1) {
       throw new IllegalArgumentException("u must be in [0,1]! (u = " + u + ")");
     }
+    if (transitions.size() == 0) {
+      throw new IllegalArgumentException("No transitions available!");
+    }
 
     double selected = u * rateTotal;
     double cumulative = 0;

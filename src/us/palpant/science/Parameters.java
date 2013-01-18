@@ -14,7 +14,7 @@ public class Parameters implements Serializable {
   @Parameter(names = { "--beta" }, description = "Thermodynamic beta (inverse temperature)")
   private double beta = 1;
   @Parameter(names = { "--k-on" }, description = "Nucleosome adsorption rate (min^-1)")
-  private double kOn = 0.2;
+  private double kOn = 1.0 / 720;
   @Parameter(names = { "--diffusion" }, description = "Thermal diffusion rate (bp^2/min)")
   private double diffusion = 60.0;
 

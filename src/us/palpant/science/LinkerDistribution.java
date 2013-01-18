@@ -37,17 +37,22 @@ public class LinkerDistribution {
     double[] counts = null;
     int[] positions = null;
     try (BinaryTrajectoryReader reader = new BinaryTrajectoryReader(inputFile)) {
-      counts = new double[reader.getLattice().size()];
+      int latticeSize = reader.getLattice().size();
+      counts = new double[latticeSize];
       Frame frame = null;
       log.info("Accumulating counts");
       while ((frame = reader.readFrame()) != null) {
         time = frame.getTime();
         dt = time - prevTime;
-        if (positions != null) {
+        if (positions != null && positions.length > 0) {
+          int startLinker = positions[0] - nucSize/2;
+          counts[startLinker] += dt;
           for (int i = 1; i < positions.length; i++) {
             int linker = positions[i] - positions[i-1] - nucSize;
             counts[linker] += dt;
           }
+          int endLinker = latticeSize - positions[positions.length-1] - nucSize/2;
+          counts[endLinker] += dt;
         }
         prevTime = time;
         positions = frame.getPositions();
@@ -58,7 +63,7 @@ public class LinkerDistribution {
       log.info(String.format("Processed %d frames", reader.getCurrentFrameNumber()));
     }
     
-    log.info("Writing probabilities to output");
+    log.info("Writing linker distribution to output");
     try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(outputFile, Charset.defaultCharset()))) {
       double p;
       for (int i = 0; i < counts.length; i++) {

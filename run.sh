@@ -14,6 +14,7 @@ then
   echo ConvertTrajectory 
   echo PDistribution 
   echo LinkerDistribution
+  echo DynaPro
   exit
 fi
 
