@@ -5,6 +5,9 @@ import java.awt.EventQueue;
 import javax.swing.JFrame;
 import javax.swing.JProgressBar;
 
+import us.palpant.cmd.PathConverter;
+import us.palpant.cmd.ReadablePathValidator;
+
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
@@ -15,17 +18,12 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import us.palpant.science.io.Frame;
-import us.palpant.science.io.BinaryTrajectoryReader;
-
 public class VisualizeTrajectory {
 
   private JFrame frame = new JFrame();
   JProgressBar progressBar = new JProgressBar();
   private LatticePanel latticePanel;
-  private BinaryTrajectoryReader reader;
   private boolean finished = false;
-  private Frame nextFrame;
   private double t = 0;
   
   @Parameter(names = { "-i", "--input" }, description = "Input file with trajectory", required = true,
