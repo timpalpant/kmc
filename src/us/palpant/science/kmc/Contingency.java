@@ -3,7 +3,7 @@ package us.palpant.science.kmc;
 import java.util.HashSet;
 import java.util.Set;
 
-import us.palpant.science.kmc.geometry.Lattice.Coordinate;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * An Edge in a dependency graph
@@ -12,15 +12,15 @@ import us.palpant.science.kmc.geometry.Lattice.Coordinate;
  */
 public class Contingency {
 
-  private final Coordinate coord;
+  private final int coord;
   private final State state;
   
-  public Contingency(Coordinate coord, State state) {
+  public Contingency(int coord, State state) {
     this.coord = coord;
     this.state = state;
   }
 
-  public final Coordinate getCoord() {
+  public final int getCoord() {
     return coord;
   }
 
@@ -38,14 +38,12 @@ public class Contingency {
    * @param c an array of Contingencies
    * @return the union set of coordinates in the Contingencies
    */
-  public static final Coordinate[] getCoordinates(Contingency[] contingencies) {
-    Set<Coordinate> coordSet = new HashSet<>();
+  public static final int[] getCoordinates(Contingency[] contingencies) {
+    Set<Integer> coordSet = new HashSet<>();
     for (Contingency c : contingencies) {
       coordSet.add(c.getCoord());
     }
-    Coordinate[] coordinates = new Coordinate[coordSet.size()];
-    coordSet.toArray(coordinates);
-    return coordinates;
+    return ArrayUtils.toPrimitive(coordSet.toArray(new Integer[coordSet.size()]));
   }
 
 }

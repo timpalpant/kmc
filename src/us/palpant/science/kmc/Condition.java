@@ -1,7 +1,5 @@
 package us.palpant.science.kmc;
 
-import us.palpant.science.kmc.geometry.Lattice.Coordinate;
-
 /**
  * A Condition is an upstream Contingency
  * @author palpant
@@ -9,12 +7,8 @@ import us.palpant.science.kmc.geometry.Lattice.Coordinate;
  */
 public class Condition extends Contingency {
 
-  public Condition(Coordinate coord, State state) {
+  public Condition(int coord, State state) {
     super(coord, state);
-  }
-  
-  public boolean isSatified() {
-    return getCoord().getState() == getState();
   }
   
 }

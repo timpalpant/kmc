@@ -7,9 +7,10 @@ import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
-import us.palpant.science.kmc.config.Ark;
-import us.palpant.science.kmc.config.ArkException;
+import us.palpant.Ark;
+import us.palpant.ArkException;
 import us.palpant.science.kmc.geometry.Lattice;
+import us.palpant.science.kmc.geometry.Lattice.BoundaryCondition;
 import us.palpant.science.kmc.plugins.Plugin;
 
 /**
@@ -30,37 +31,21 @@ public class Main {
   }
   
   public Lattice initLattice() {
-    String[] dims = (String[]) config.get("geometry.dimensions");
-    Lattice lattice;
-    switch (dims.length) {
-    case 1:
-      lattice = new Lattice(Integer.parseInt(dims[0]));
-      break;
-    case 2:
-      lattice = new Lattice(Integer.parseInt(dims[0]), 
-                            Integer.parseInt(dims[1]));
-      break;
-    case 3:
-      lattice = new Lattice(Integer.parseInt(dims[0]), 
-                            Integer.parseInt(dims[1]), 
-                            Integer.parseInt(dims[2]));
-      break;
-    default:
-      throw new RuntimeException("Lattice only supports 1, 2, or 3 dimensions");
-    }
-    
+    int length = Integer.parseInt((String)config.get("lattice.length"));
+    BoundaryCondition bc = BoundaryCondition.forName((String)config.get("lattice.bc"));
+    Lattice lattice = new Lattice(length, bc);
     lattice.fill(State.EMPTY);
     return lattice;
   }
   
-  private Ark getStates() {
-	  return (Ark) config.get("states");
+  private Ark getParticles() {
+	  return (Ark) config.get("particles");
 	}
   
   public Transition[] initTransitions(Lattice lattice) {
     log.info("Initializing the transitions");
     List<Transition> transitions = new ArrayList<>();
-    for (Entry<String,Object> keypair : getStates()) {
+    for (Entry<String,Object> keypair : getParticles()) {
       State state = State.forName(keypair.getKey());
       Ark stateConfig = (Ark) keypair.getValue();
       Particle particle = new Particle(lattice, state, stateConfig);
@@ -133,6 +118,7 @@ public class Main {
     
     log.info("Loading configuration");
     Ark config = Ark.fromArgv(args);
+    log.debug("Initializing application");
     Main app = new Main(config);
     app.run();
   }

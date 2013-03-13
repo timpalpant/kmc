@@ -1,14 +1,12 @@
 package us.palpant.science.kmc;
 
-import us.palpant.science.kmc.geometry.Lattice.Coordinate;
-
 public class Transition {
 
   private final String name;
   private final Condition[] conditions;
   private final Action[] actions;
-  private final Coordinate[] upstreamCoordinates;
-  private final Coordinate[] downstreamCoordinates;
+  private final int[] upstreamCoordinates;
+  private final int[] downstreamCoordinates;
   private double rate;
   private boolean enabled = true;
   
@@ -22,11 +20,15 @@ public class Transition {
     downstreamCoordinates = Contingency.getCoordinates(actions);
   }
   
+  public Transition(Condition[] conditions, Action[] actions, double rate) {
+    this(null, conditions, actions, rate);
+  }
+  
   public final Condition[] getConditions() {
     return conditions;
   }
   
-  public final Coordinate[] getUpstreamCoordinates() {
+  public final int[] getUpstreamCoordinates() {
     return upstreamCoordinates;
   }
 
@@ -34,7 +36,7 @@ public class Transition {
     return actions;
   }
 
-  public final Coordinate[] getDownstreamCoordinates() {
+  public final int[] getDownstreamCoordinates() {
     return downstreamCoordinates;
   }
 

@@ -9,10 +9,16 @@ import java.nio.file.Paths;
 
 import org.apache.log4j.Logger;
 
+import us.palpant.Ark;
 import us.palpant.science.kmc.State;
-import us.palpant.science.kmc.config.Ark;
 import us.palpant.science.kmc.geometry.Lattice;
 
+/**
+ * Calculate the number of objects of a certain state on the Lattice
+ * 
+ * @author timpalpant
+ *
+ */
 public class NObjects extends Plugin {
   
   private static final Logger log = Logger.getLogger(NObjects.class);

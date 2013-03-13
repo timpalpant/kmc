@@ -78,16 +78,8 @@ public class VisualizeTrajectory {
 
     progressBar.setMaximum((int) (100*tFinal));
     frame.getContentPane().add(progressBar, BorderLayout.SOUTH);
-
-    reader = new BinaryTrajectoryReader(inputFile);
-    try {
-      nextFrame = reader.readFrame();
-    } catch (ClassNotFoundException e1) {
-      finished = true;
-      e1.printStackTrace();
-    }
     
-    latticePanel = new LatticePanel(reader.getLattice().size(), nucSize);
+    latticePanel = new LatticePanel(100, 100);
     frame.getContentPane().add(latticePanel, BorderLayout.CENTER);
 
     new javax.swing.Timer(30, new ActionListener() {
@@ -106,24 +98,24 @@ public class VisualizeTrajectory {
         progressBar.setValue(progressBar.getMaximum());
       }
 
-      if (nextFrame.getTime() < t) {
-        int[] positions = nextFrame.getPositions();
-        latticePanel.setPositions(positions);
-        
-        while (nextFrame != null && nextFrame.getTime() < t) {
-          try {
-            nextFrame = reader.readFrame();
-          } catch (ClassNotFoundException | IOException e) {
-            e.printStackTrace();
-            finished = true;
-          }
-        }
-
-        if (nextFrame == null) {
-          finished = true;
-          progressBar.setValue(progressBar.getMaximum());
-        }
-      }
+//      if (nextFrame.getTime() < t) {
+//        int[] positions = nextFrame.getPositions();
+//        latticePanel.setPositions(positions);
+//        
+//        while (nextFrame != null && nextFrame.getTime() < t) {
+//          try {
+//            nextFrame = reader.readFrame();
+//          } catch (ClassNotFoundException | IOException e) {
+//            e.printStackTrace();
+//            finished = true;
+//          }
+//        }
+//
+//        if (nextFrame == null) {
+//          finished = true;
+//          progressBar.setValue(progressBar.getMaximum());
+//        }
+//      }
     }
   }
 }

@@ -5,9 +5,14 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
-import us.palpant.science.kmc.config.Ark;
+import us.palpant.Ark;
 import us.palpant.science.kmc.geometry.Lattice;
 
+/**
+ * A plugin is called once per KMC time step
+ * @author timpalpant
+ *
+ */
 public abstract class Plugin implements Closeable {
   
   private static final Logger log = Logger.getLogger(Plugin.class);

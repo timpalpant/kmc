@@ -2,14 +2,11 @@ package us.palpant.science.kmc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import us.palpant.science.kmc.geometry.Lattice;
-import us.palpant.science.kmc.geometry.Lattice.Coordinate;
 
 /**
  * Manage the Transitions database
@@ -25,28 +22,24 @@ public class TransitionManager {
   private final Lattice lattice;
   private final Transition[] transitions;
   private final double[] accumulatedRates;
-  private final Map<Coordinate,List<Transition>> dependencies;
+  private final List<List<Transition>> dependencies;
   
   public TransitionManager(Lattice lattice, Transition[] transitions) {
     this.lattice = lattice;
     this.transitions = transitions;
-    if (transitions.length == 0) {
-      throw new IllegalArgumentException("KMC requires at least one Transition!");
-    }
     log.debug("Initializing transition manager with "+transitions.length+" transitions");
     accumulatedRates = new double[transitions.length];
     
-    // Initialize the dependency graph
-    dependencies = new HashMap<Coordinate,List<Transition>>();
+    // Initialize the dependencies
+    dependencies = new ArrayList<>();
+    for (int i = 0; i < lattice.size(); i++) {
+      dependencies.add(new ArrayList<Transition>());
+    }
     for (Transition t : transitions) {
-      for (Coordinate c : t.getUpstreamCoordinates()) {
-        if (!dependencies.containsKey(c)) {
-          dependencies.put(c, new ArrayList<Transition>());
-        }
-        dependencies.get(c).add(t);
+      for (int coord : t.getUpstreamCoordinates()) {
+        dependencies.get(coord).add(t);
       }
     }
-    log.debug(dependencies.size()+" coordinates in dependency tree");
     
     updateAllTransitions();
     updateAccumulatedRates();
@@ -83,8 +76,8 @@ public class TransitionManager {
     }
     
     // Update downstream transitions
-    for (Coordinate c : t.getDownstreamCoordinates()) {
-      updateTransitions(c);
+    for (int coord : t.getDownstreamCoordinates()) {
+      updateTransitions(coord);
     }
     
     updateAccumulatedRates();
@@ -97,7 +90,7 @@ public class TransitionManager {
   private void updateTransition(Transition t) {
     t.setEnabled(true);
     for (Condition c : t.getConditions()) {
-      if (!c.isSatified()) {
+      if (!lattice.isSatisfied(c)) {
         t.setEnabled(false);
         break;
       }
@@ -108,7 +101,7 @@ public class TransitionManager {
    * Update transitions that have a condition on coord
    * @param coord the coordinate that is changing
    */
-  private void updateTransitions(Coordinate coord) {
+  private void updateTransitions(int coord) {
     for (Transition t : dependencies.get(coord)) {
       updateTransition(t);
     }

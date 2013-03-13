@@ -6,17 +6,17 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
-import us.palpant.science.kmc.State;
-import us.palpant.science.kmc.config.Ark;
+import us.palpant.Ark;
 import us.palpant.science.kmc.geometry.Lattice;
-import us.palpant.science.kmc.geometry.Lattice.Coordinate;
 
+/**
+ * Write a trajectory of the lattice state at each time point
+ * @author timpalpant
+ *
+ */
 public class Trajectory extends Plugin {
   
   private static final Logger log = Logger.getLogger(Trajectory.class);
@@ -50,16 +50,7 @@ public class Trajectory extends Plugin {
   @Override
   public void process(double time) {
     if (((currentStep++) - first) % stride == 0) {
-      writer.print(time);
-      writer.print('\t');
-      
-      List<Integer> occupied = new ArrayList<>();
-      for (Coordinate c : lattice) {
-        if (lattice.get(c) != State.EMPTY) {
-          occupied.add(c.getX());
-        }
-      }
-      writer.println(StringUtils.join(occupied, ','));
+      writer.println(time+"\t"+lattice);
     }
   }
 

@@ -44,6 +44,10 @@ public class State {
   public static int getNumStates() {
     return nStates;
   }
+  
+  public int getId() {
+    return id;
+  }
 
   /**
    * @return the name

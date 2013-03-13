@@ -4,9 +4,14 @@ import java.io.IOException;
 
 import org.apache.log4j.Logger;
 
-import us.palpant.science.kmc.config.Ark;
+import us.palpant.Ark;
 import us.palpant.science.kmc.geometry.Lattice;
 
+/**
+ * Log progress information at specified intervals
+ * @author timpalpant
+ *
+ */
 public class Status extends Plugin {
   
   private static final Logger log = Logger.getLogger(Status.class);

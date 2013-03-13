@@ -9,11 +9,17 @@ import java.nio.file.Paths;
 
 import org.apache.log4j.Logger;
 
+import us.palpant.Ark;
 import us.palpant.science.kmc.State;
-import us.palpant.science.kmc.config.Ark;
 import us.palpant.science.kmc.geometry.Lattice;
-import us.palpant.science.kmc.geometry.Lattice.Coordinate;
 
+/**
+ * Calculate the fraction of the time that each lattice point
+ * is in a certain state
+ * 
+ * @author timpalpant
+ *
+ */
 public class Distribution extends Plugin {
   
   private static final Logger log = Logger.getLogger(Distribution.class);
@@ -22,12 +28,12 @@ public class Distribution extends Plugin {
   private final Path outputFile;
   private double lastTime = 0;
   private Lattice lastState;
-  private double[][][] dist;
+  private double[] dist;
   
   public Distribution(Lattice lattice, Ark config) {
     super(lattice);
-    lastState = new Lattice(lattice.sizeX(), lattice.sizeY(), lattice.sizeZ());
-    dist = new double[lattice.sizeX()][lattice.sizeY()][lattice.sizeZ()];
+    lastState = new Lattice(lattice.size(), lattice.getBoundaryCondition());
+    dist = new double[lattice.size()];
     state = State.forName((String)config.get("state"));
     outputFile = Paths.get((String)config.get("name"));
   }
@@ -35,11 +41,11 @@ public class Distribution extends Plugin {
   @Override
   public void process(double time) {
     double dt = time - lastTime;
-    for (Coordinate c : lattice) {
-      if (lastState.get(c) == state) {
-        dist[c.getX()][c.getY()][c.getZ()] += dt;
+    for (int i = 0; i < lastState.size(); i++) {
+      if (lastState.get(i) == state) {
+        dist[i] += dt;
       }
-      lastState.set(c, lattice.get(c));
+      lastState.set(i, lattice.get(i));
     }
     
     lastTime = time;
@@ -49,8 +55,8 @@ public class Distribution extends Plugin {
   public void close() throws IOException {
     log.debug("Writing distribution to output file: "+outputFile);
     try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(outputFile, Charset.defaultCharset()))) {
-      for (Coordinate c : lastState) {
-        writer.println(c+"\t"+dist[c.getX()][c.getY()][c.getZ()]/lastTime);
+      for (int i = 0; i < lastState.size(); i++) {
+        writer.println(i+"\t"+dist[i]/lastTime);
       }
     }
   }
