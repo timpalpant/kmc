@@ -1,6 +1,10 @@
 package us.palpant.science.kmc;
 
+import org.apache.log4j.Logger;
+
 public class Transition {
+  
+  private static final Logger log = Logger.getLogger(Transition.class);
 
   private final String name;
   private final Condition[] conditions;
@@ -17,7 +21,13 @@ public class Transition {
     this.rate = rate;
     
     upstreamCoordinates = Contingency.getCoordinates(conditions);
+    if (upstreamCoordinates.length != conditions.length) {
+      log.warn("Multiple conditions on the same coordinate detected: "+toString());
+    }
     downstreamCoordinates = Contingency.getCoordinates(actions);
+    if (upstreamCoordinates.length != conditions.length) {
+      log.warn("Multiple actions on the same coordinate detected: "+toString());
+    }
   }
   
   public Transition(Condition[] conditions, Action[] actions, double rate) {
