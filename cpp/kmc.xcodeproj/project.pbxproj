@@ -41,9 +41,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1FB82FA11705504D00F0CEE7 /* libs */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = libs;
+			sourceTree = "<group>";
+		};
 		1FBC7C36170531E300B7FB02 = {
 			isa = PBXGroup;
 			children = (
+				1FB82FA11705504D00F0CEE7 /* libs */,
 				1FBC7C41170531E300B7FB02 /* kmc */,
 				1FBC7C40170531E300B7FB02 /* Products */,
 			);
@@ -186,6 +194,11 @@
 		1FBC7C49170531E300B7FB02 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					libs,
+					/usr/local/include,
+				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -193,6 +206,11 @@
 		1FBC7C4A170531E300B7FB02 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					libs,
+					/usr/local/include,
+				);
+				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -216,6 +234,7 @@
 				1FBC7C4A170531E300B7FB02 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
