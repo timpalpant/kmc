@@ -1,0 +1,33 @@
+<lattice>
+    <length>1100</length>
+    <bc>fixed</bc>
+</lattice>
+
+<particles>
+    <nuc>
+        <size>147</size>
+        <unwrap>true</unwrap>
+    </nuc>
+    <tf>
+        <size>8</size>
+    </tf>
+</particles>
+
+<kmc>
+    <temperature>1</temperature>
+    <seed>10011989</seed>
+    <last_time>10000</last_time>
+    <plugins>
+        <nucdistribution>
+            <type>distribution</type>
+        </nucdistribution>
+      
+        <tfdistribution>
+            <type>distribution</type>
+        </tfdistribution>
+      
+        <status>
+            <type>status</type>
+        </status>
+    </plugins>
+</kmc>

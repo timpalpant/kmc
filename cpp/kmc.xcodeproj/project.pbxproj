@@ -7,6 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1FA7AEEC1706A8030012465E /* lattice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1FA7AEE81706A8030012465E /* lattice.cpp */; };
+		1FA7AEED1706A8030012465E /* state.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1FA7AEEA1706A8030012465E /* state.cpp */; };
+		1FA7AEF8170741CD0012465E /* kmc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1FA7AEF7170741CC0012465E /* kmc.cpp */; };
+		1FA7AEFB170747310012465E /* transition_manager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1FA7AEFA170747310012465E /* transition_manager.cpp */; };
+		1FA7AF02170766610012465E /* particle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1FA7AF01170766610012465E /* particle.cpp */; };
+		1FA7AF051707B6D90012465E /* parameters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1FA7AF041707B6D80012465E /* parameters.cpp */; };
+		1FA7AF071707CCCA0012465E /* libboost_filesystem-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FA7AF061707CCCA0012465E /* libboost_filesystem-mt.dylib */; };
+		1FA7AF0B1707CCE10012465E /* libboost_system-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FA7AF0A1707CCE10012465E /* libboost_system-mt.dylib */; };
+		1FA7AF241707ECF80012465E /* status.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1FA7AF231707ECF80012465E /* status.cpp */; };
+		1FA7AF261708FD420012465E /* trajectory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1FA7AF251708FD420012465E /* trajectory.cpp */; };
+		1FA7AF29170901830012465E /* nobjects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1FA7AF28170901830012465E /* nobjects.cpp */; };
+		1FA7AF2B170903830012465E /* distribution.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1FA7AF2A170903830012465E /* distribution.cpp */; };
 		1FBC7C43170531E300B7FB02 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1FBC7C42170531E300B7FB02 /* main.cpp */; };
 		1FBC7C45170531E300B7FB02 /* kmc.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1FBC7C44170531E300B7FB02 /* kmc.1 */; };
 /* End PBXBuildFile section */
@@ -25,6 +37,31 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1FA7AEE81706A8030012465E /* lattice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lattice.cpp; sourceTree = "<group>"; };
+		1FA7AEE91706A8030012465E /* lattice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lattice.h; sourceTree = "<group>"; };
+		1FA7AEEA1706A8030012465E /* state.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = state.cpp; sourceTree = "<group>"; };
+		1FA7AEEB1706A8030012465E /* state.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = state.h; sourceTree = "<group>"; };
+		1FA7AEEF1706A8410012465E /* contingency.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = contingency.h; sourceTree = "<group>"; };
+		1FA7AEF11706AD0A0012465E /* transition.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = transition.h; sourceTree = "<group>"; };
+		1FA7AEF417073B650012465E /* plugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = plugin.h; sourceTree = "<group>"; };
+		1FA7AEF5170740790012465E /* distribution.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = distribution.h; sourceTree = "<group>"; };
+		1FA7AEF6170740B50012465E /* kmc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = kmc.h; sourceTree = "<group>"; };
+		1FA7AEF7170741CC0012465E /* kmc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = kmc.cpp; sourceTree = "<group>"; };
+		1FA7AEF9170741E80012465E /* transition_manager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = transition_manager.h; sourceTree = "<group>"; };
+		1FA7AEFA170747310012465E /* transition_manager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = transition_manager.cpp; sourceTree = "<group>"; };
+		1FA7AF001707664D0012465E /* particle.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = particle.h; sourceTree = "<group>"; };
+		1FA7AF01170766610012465E /* particle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = particle.cpp; sourceTree = "<group>"; };
+		1FA7AF031707B5530012465E /* parameters.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = parameters.h; sourceTree = "<group>"; };
+		1FA7AF041707B6D80012465E /* parameters.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parameters.cpp; sourceTree = "<group>"; };
+		1FA7AF061707CCCA0012465E /* libboost_filesystem-mt.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libboost_filesystem-mt.dylib"; path = "../../../../../../usr/local/lib/libboost_filesystem-mt.dylib"; sourceTree = "<group>"; };
+		1FA7AF0A1707CCE10012465E /* libboost_system-mt.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libboost_system-mt.dylib"; path = "../../../../../../usr/local/lib/libboost_system-mt.dylib"; sourceTree = "<group>"; };
+		1FA7AF211707EAB40012465E /* status.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = status.h; sourceTree = "<group>"; };
+		1FA7AF221707EC930012465E /* trajectory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = trajectory.h; sourceTree = "<group>"; };
+		1FA7AF231707ECF80012465E /* status.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = status.cpp; sourceTree = "<group>"; };
+		1FA7AF251708FD420012465E /* trajectory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = trajectory.cpp; sourceTree = "<group>"; };
+		1FA7AF271709013D0012465E /* nobjects.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = nobjects.h; sourceTree = "<group>"; };
+		1FA7AF28170901830012465E /* nobjects.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = nobjects.cpp; sourceTree = "<group>"; };
+		1FA7AF2A170903830012465E /* distribution.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = distribution.cpp; sourceTree = "<group>"; };
 		1FBC7C3F170531E300B7FB02 /* kmc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = kmc; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FBC7C42170531E300B7FB02 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		1FBC7C44170531E300B7FB02 /* kmc.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = kmc.1; sourceTree = "<group>"; };
@@ -35,23 +72,45 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1FA7AF0B1707CCE10012465E /* libboost_system-mt.dylib in Frameworks */,
+				1FA7AF071707CCCA0012465E /* libboost_filesystem-mt.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		1FB82FA11705504D00F0CEE7 /* libs */ = {
+		1FA7AEDF170694020012465E /* plugins */ = {
 			isa = PBXGroup;
 			children = (
+				1FA7AEF5170740790012465E /* distribution.h */,
+				1FA7AF2A170903830012465E /* distribution.cpp */,
+				1FA7AF211707EAB40012465E /* status.h */,
+				1FA7AF231707ECF80012465E /* status.cpp */,
+				1FA7AF221707EC930012465E /* trajectory.h */,
+				1FA7AF251708FD420012465E /* trajectory.cpp */,
+				1FA7AF271709013D0012465E /* nobjects.h */,
+				1FA7AF28170901830012465E /* nobjects.cpp */,
 			);
-			path = libs;
+			name = plugins;
+			sourceTree = "<group>";
+		};
+		1FA7AEEE1706A8080012465E /* lattice */ = {
+			isa = PBXGroup;
+			children = (
+				1FA7AEE81706A8030012465E /* lattice.cpp */,
+				1FA7AEE91706A8030012465E /* lattice.h */,
+				1FA7AEEA1706A8030012465E /* state.cpp */,
+				1FA7AEEB1706A8030012465E /* state.h */,
+			);
+			name = lattice;
 			sourceTree = "<group>";
 		};
 		1FBC7C36170531E300B7FB02 = {
 			isa = PBXGroup;
 			children = (
-				1FB82FA11705504D00F0CEE7 /* libs */,
+				1FA7AF0A1707CCE10012465E /* libboost_system-mt.dylib */,
+				1FA7AF061707CCCA0012465E /* libboost_filesystem-mt.dylib */,
 				1FBC7C41170531E300B7FB02 /* kmc */,
 				1FBC7C40170531E300B7FB02 /* Products */,
 			);
@@ -68,8 +127,21 @@
 		1FBC7C41170531E300B7FB02 /* kmc */ = {
 			isa = PBXGroup;
 			children = (
+				1FA7AEEE1706A8080012465E /* lattice */,
+				1FA7AEDF170694020012465E /* plugins */,
 				1FBC7C42170531E300B7FB02 /* main.cpp */,
 				1FBC7C44170531E300B7FB02 /* kmc.1 */,
+				1FA7AEEF1706A8410012465E /* contingency.h */,
+				1FA7AEF6170740B50012465E /* kmc.h */,
+				1FA7AEF7170741CC0012465E /* kmc.cpp */,
+				1FA7AEF11706AD0A0012465E /* transition.h */,
+				1FA7AEF9170741E80012465E /* transition_manager.h */,
+				1FA7AEFA170747310012465E /* transition_manager.cpp */,
+				1FA7AF001707664D0012465E /* particle.h */,
+				1FA7AF01170766610012465E /* particle.cpp */,
+				1FA7AF031707B5530012465E /* parameters.h */,
+				1FA7AF041707B6D80012465E /* parameters.cpp */,
+				1FA7AEF417073B650012465E /* plugin.h */,
 			);
 			path = kmc;
 			sourceTree = "<group>";
@@ -126,6 +198,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				1FBC7C43170531E300B7FB02 /* main.cpp in Sources */,
+				1FA7AEEC1706A8030012465E /* lattice.cpp in Sources */,
+				1FA7AEED1706A8030012465E /* state.cpp in Sources */,
+				1FA7AEF8170741CD0012465E /* kmc.cpp in Sources */,
+				1FA7AEFB170747310012465E /* transition_manager.cpp in Sources */,
+				1FA7AF02170766610012465E /* particle.cpp in Sources */,
+				1FA7AF051707B6D90012465E /* parameters.cpp in Sources */,
+				1FA7AF241707ECF80012465E /* status.cpp in Sources */,
+				1FA7AF261708FD420012465E /* trajectory.cpp in Sources */,
+				1FA7AF29170901830012465E /* nobjects.cpp in Sources */,
+				1FA7AF2B170903830012465E /* distribution.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -194,11 +276,11 @@
 		1FBC7C49170531E300B7FB02 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = (
-					libs,
-					/usr/local/include,
-				);
+				GCC_UNROLL_LOOPS = NO;
+				HEADER_SEARCH_PATHS = /usr/local/include;
 				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				LLVM_LTO = NO;
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -206,11 +288,12 @@
 		1FBC7C4A170531E300B7FB02 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				HEADER_SEARCH_PATHS = (
-					libs,
-					/usr/local/include,
-				);
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_UNROLL_LOOPS = NO;
+				HEADER_SEARCH_PATHS = /usr/local/include;
 				LIBRARY_SEARCH_PATHS = /usr/local/lib;
+				LLVM_LTO = YES;
+				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

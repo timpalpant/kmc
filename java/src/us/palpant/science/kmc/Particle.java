@@ -147,7 +147,7 @@ public class Particle {
     for (int i = 0; i < lattice.size()-size-1; i++) {
       Condition[] conditions = new Condition[2];
       conditions[0] = new Condition(i, state);
-      conditions[1] = new Condition(i+size+1, State.EMPTY);
+      conditions[1] = new Condition(i+size, State.EMPTY);
       Action[] actions = new Action[3];
       actions[0] = new Action(i, State.EMPTY);
       actions[1] = new Action(i+1, state);
