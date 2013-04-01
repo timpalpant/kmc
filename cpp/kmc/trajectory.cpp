@@ -14,7 +14,7 @@ namespace kmc {
     
     void Trajectory::boot(kmc::lattice::Lattice* lattice) {
       lattice_ = lattice;
-      of_ = std::ofstream(p_.string());
+      of_.open(p_.string());
       for (const kmc::lattice::State* s : kmc::lattice::State::states()) {
         of_ << "# " << s->id() << '\t' << s->name() << std::endl;
       }

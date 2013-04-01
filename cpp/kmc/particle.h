@@ -24,7 +24,7 @@ namespace kmc {
     std::size_t size_ = 1;
     double adsorption_rate_ = 1.0;
     double desorption_rate_ = 1.0;
-    double diffusion_rate_ = 10.0;
+    double diffusion_rate_ = 1.0;
     
   public:
     Particle(lattice::State* state);
@@ -50,7 +50,7 @@ namespace kmc {
     }
     
     double hop_rate(const std::size_t i1, const std::size_t j1,
-                    const std::size_t i2, const std::size_2 j2) const {
+                    const std::size_t i2, const std::size_t j2) const {
       return 0;
     }
   };

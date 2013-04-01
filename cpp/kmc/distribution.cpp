@@ -18,7 +18,7 @@ namespace kmc {
       lattice_ = lattice;
       last_state_ = std::vector<lattice::State*>(lattice_->states());
       dist_ = std::vector<double>(lattice_->size());
-      of_ = std::ofstream(p_.string());
+      of_.open(p_.string());
       of_ << "# Position\tProbability" << std::endl;
     }
     

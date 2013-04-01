@@ -15,7 +15,7 @@ namespace kmc {
     
     void NObjects::boot(kmc::lattice::Lattice* lattice) {
       lattice_ = lattice;
-      of_ = std::ofstream(p_.string());
+      of_.open(p_.string());
       of_ << "# " << state_->name() << std::endl;
     }
 

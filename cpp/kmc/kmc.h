@@ -10,6 +10,7 @@
 #define kmc_kmc_h
 
 #include <random>
+#include <memory>
 
 #include "transition_manager.h"
 #include "plugin.h"

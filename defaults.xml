@@ -8,15 +8,12 @@
         <size>147</size>
         <unwrap>true</unwrap>
     </nuc>
-    <tf>
-        <size>8</size>
-    </tf>
 </particles>
 
 <kmc>
     <temperature>1</temperature>
     <seed>10011989</seed>
-    <last_time>10000</last_time>
+    <last_time>100000</last_time>
     <plugins>
         <nucdistribution>
             <type>distribution</type>
