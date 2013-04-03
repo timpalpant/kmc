@@ -12,7 +12,7 @@ namespace kmc {
   namespace plugin {
     void Distribution::configure(const boost::property_tree::ptree& pt) {
       p_ = pt.get<boost::filesystem::path>("output");
-      std::string particle = pt.get<std::string>("particle");
+      std::string particle = pt.get<std::string>("state");
       state_ = lattice::State::for_name(particle);
     }
     

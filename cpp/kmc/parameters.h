@@ -15,32 +15,23 @@
 #ifndef kmc_config_h
 #define kmc_config_h
 
-#include <exception>
-
 #include <boost/filesystem.hpp>
 
 #include "lattice.h"
 #include "particle.h"
 #include "plugin.h"
+#include "config_error.h"
 
 namespace kmc {
-  class config_error : public std::runtime_error {
-  public:
-    explicit config_error(const std::string& what_arg)
-      : std::runtime_error(what_arg) { }
-    explicit config_error(const char* what_arg)
-      : std::runtime_error(what_arg) { }
-  };
-  
   class Parameters {
   private:
     std::vector<Particle> particles_;
     std::vector<std::shared_ptr<plugin::Plugin>> plugins_;
     std::size_t lattice_size_;
     lattice::BoundaryCondition bc_;
-    double temperature_;
+    double beta_;
     double t_final_;
-    std::size_t seed_;
+    unsigned int seed_;
         
   public:
     static Parameters load(const boost::filesystem::path& p) throw (config_error);
@@ -54,12 +45,12 @@ namespace kmc {
     void add_particle(const Particle& p) { particles_.push_back(p); }
     const std::vector<std::shared_ptr<plugin::Plugin>>& plugins() const { return plugins_; }
     void add_plugin(const std::shared_ptr<plugin::Plugin>& p) { plugins_.push_back(p); }
-    double temperature() const { return temperature_; }
-    void set_temperature(const double t) { temperature_ = t; }
+    double beta() const { return beta_; }
+    void set_beta(const double beta) { beta_ = beta; }
     double t_final() const { return t_final_; }
     void set_t_final(const double t) { t_final_ = t; }
-    std::size_t seed() const { return seed_; }
-    void set_seed(const std::size_t seed) { seed_ = seed; }
+    unsigned int seed() const { return seed_; }
+    void set_seed(const unsigned int seed) { seed_ = seed; }
   };
 }
 

@@ -37,6 +37,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1F158025170BD036007AD967 /* config_error.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = config_error.h; sourceTree = "<group>"; };
+		1F158026170BD0C3007AD967 /* plugin_factory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = plugin_factory.h; sourceTree = "<group>"; };
 		1FA7AEE81706A8030012465E /* lattice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = lattice.cpp; sourceTree = "<group>"; };
 		1FA7AEE91706A8030012465E /* lattice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = lattice.h; sourceTree = "<group>"; };
 		1FA7AEEA1706A8030012465E /* state.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = state.cpp; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 			children = (
 				1FA7AEEE1706A8080012465E /* lattice */,
 				1FA7AEDF170694020012465E /* plugins */,
+				1F158025170BD036007AD967 /* config_error.h */,
 				1FBC7C42170531E300B7FB02 /* main.cpp */,
 				1FBC7C44170531E300B7FB02 /* kmc.1 */,
 				1FA7AEEF1706A8410012465E /* contingency.h */,
@@ -142,6 +145,7 @@
 				1FA7AF031707B5530012465E /* parameters.h */,
 				1FA7AF041707B6D80012465E /* parameters.cpp */,
 				1FA7AEF417073B650012465E /* plugin.h */,
+				1F158026170BD0C3007AD967 /* plugin_factory.h */,
 			);
 			path = kmc;
 			sourceTree = "<group>";
@@ -289,7 +293,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_OPTIMIZATION_LEVEL = 3;
-				GCC_UNROLL_LOOPS = NO;
+				GCC_UNROLL_LOOPS = YES;
 				HEADER_SEARCH_PATHS = /usr/local/include;
 				LIBRARY_SEARCH_PATHS = /usr/local/lib;
 				LLVM_LTO = YES;

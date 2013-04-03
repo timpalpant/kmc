@@ -10,6 +10,7 @@
 #define kmc_plugin_factory_h
 
 #include "plugin.h"
+#include "config_error.h"
 #include "status.h"
 #include "trajectory.h"
 #include "distribution.h"
@@ -17,12 +18,12 @@
 
 namespace kmc {
   namespace plugin {
-    class plugin_error : public std::runtime_error {
+    class plugin_error : public config_error {
     public:
       explicit plugin_error(const std::string& what_arg)
-        : std::runtime_error(what_arg) { }
+        : config_error(what_arg) { }
       explicit plugin_error(const char* what_arg)
-        : std::runtime_error(what_arg) { }
+        : config_error(what_arg) { }
     };
     
     Plugin* for_type(const std::string& name) throw (plugin_error) {

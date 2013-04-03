@@ -29,23 +29,22 @@ namespace kmc {
       throw config_error("Unknown boundary condition: "+bc);
     }
     
+    // Load simulation parameters
+    const boost::property_tree::ptree& kmc = pt.get_child("kmc");
+    params.set_beta(kmc.get("beta", 1.0));
+    params.set_t_final(kmc.get<double>("last_time"));
+    params.set_seed(kmc.get<unsigned int>("seed"));
+    
     // Load particle parameters
     const boost::property_tree::ptree& particles = pt.get_child("particles");
     for (const std::pair<std::string,boost::property_tree::ptree>& ppair : particles) {
       std::string name = ppair.first;
       std::cout << "Initializing particle " << name << std::endl;
       boost::property_tree::ptree pconfig = ppair.second;
-      lattice::State* state = lattice::State::for_name(name);
-      Particle particle(state);
-      particle.configure(pconfig);     
+      Particle particle(name);
+      particle.configure(pconfig);
       params.add_particle(particle);
     }
-    
-    // Load simulation parameters
-    const boost::property_tree::ptree& kmc = pt.get_child("kmc");
-    params.set_temperature(kmc.get("temperature", 1.0));
-    params.set_t_final(kmc.get<double>("last_time"));
-    params.set_seed(kmc.get<std::size_t>("seed"));
     
     // Load plugins
     const boost::property_tree::ptree& plugins = kmc.get_child("plugins");

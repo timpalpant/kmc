@@ -13,17 +13,9 @@
 #include <stdexcept>
 
 namespace kmc {
-  // Attempt to optimize the Transition updates
-  // As long as all Actions are meaningful (i.e. they change the State)
-  // then we can assume that any changes to a Transition that was enabled
-  // will disable it. If we detect non-meaningful actions,
-  // optimization will be automatically turned off
-  bool optimize = true;
-  
-  TransitionManager::TransitionManager(lattice::Lattice* lattice,
-                                       std::vector<Transition*>&& transitions) :
-    lattice_(lattice), transitions_(transitions),
-    accumulated_rates_(transitions.size()) {
+  LatticeTransitionManager::LatticeTransitionManager(lattice::Lattice* lattice,
+                                                     std::vector<Transition*>&& transitions) :
+    lattice_(lattice), transitions_(transitions), accumulated_rates_(transitions.size()) {
       
     std::cout << "Initializing transition manager with "
       << transitions_.size() << " transitions and " << lattice::State::n_states()
@@ -68,29 +60,33 @@ namespace kmc {
     update_accumulated_rates();
   }
   
-  // Get the selected Transition for the random number r \in [0,1]
-  std::size_t TransitionManager::transition(const double r) const {
+  /** 
+   * Get the selected Transition for the random number r \in [0,1]
+   */
+  std::size_t LatticeTransitionManager::transition(const double r) const {
     std::vector<double>::const_iterator selected = std::lower_bound(accumulated_rates_.begin(),
                                                                     accumulated_rates_.end(),
                                                                     r*rate_total());
     return std::distance(accumulated_rates_.begin(), selected);
   }
   
-  // For the random number r \in [0,1], get the selected Transition,
-  // perform its actions, and update any downstream dependencies
-  void TransitionManager::move(double r) {
+  /**
+   * For the random number r \in [0,1], get the selected Transition,
+   * perform its actions, and update any downstream dependencies
+   */
+  void LatticeTransitionManager::move(double r) {
     std::size_t selected = transition(r);
     const Transition* t = transitions_[selected];
     for (const Action& a : t->actions()) {
       bool changed = lattice_->set(a.coord(), a.state());
-      if (optimize && !changed) {
+      if (optimize_ && !changed) {
         std::cerr << "Action performed had no effect. Turning off optimization" << std::endl;
-        optimize = false;
+        optimize_ = false;
       }
     }
     
     for (Transition* t : downstream_[selected]) {
-      if (optimize && t->enabled()) {
+      if (optimize_ && t->enabled()) {
         t->set_enabled(false);
       } else {
         update_transition(t);
@@ -100,8 +96,10 @@ namespace kmc {
     update_accumulated_rates();
   }
   
-  // Update the table of accumulated rates
-  void TransitionManager::update_accumulated_rates() {
+  /**
+   * Update the table of accumulated rates
+   */
+  void LatticeTransitionManager::update_accumulated_rates() {
     accumulated_rates_[0] = transitions_[0]->enabled() ? transitions_[0]->rate() : 0.0;
     for (std::size_t i = 1; i < transitions_.size(); i++) {
       double rate = transitions_[i]->enabled() ? transitions_[i]->rate() : 0.0;
@@ -109,9 +107,11 @@ namespace kmc {
     }
   }
   
-  // Check whether a Transition's conditions are all satisified
-  // and mark it as enabled/disabled
-  void TransitionManager::update_transition(Transition* t) {
+  /**
+   * Check whether a Transition's conditions are all satisified
+   * and mark it as enabled/disabled
+   */
+  void LatticeTransitionManager::update_transition(Transition* t) {
     t->set_enabled(true);
     for (const Condition& c : t->conditions()) {
       if (!lattice_->satisfies(c)) {
@@ -121,15 +121,19 @@ namespace kmc {
     }
   }
   
-  // Mark all Transitions as enabled/disabled
-  void TransitionManager::update_all_transitions() {
+  /**
+   * Mark all Transitions as enabled/disabled
+   */
+  void LatticeTransitionManager::update_all_transitions() {
     for (Transition* t : transitions_) {
       update_transition(t);
     }
   }
   
-  // The total rate of all enabled Transitions
-  double TransitionManager::rate_total() const {
+  /**
+   * The total rate of all enabled Transitions
+   */
+  double LatticeTransitionManager::rate_total() const {
     return accumulated_rates_.back();
   }
 }

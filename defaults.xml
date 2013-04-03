@@ -9,34 +9,38 @@
         <transitions>
             <adsorption>
                 <type>adsorption</type>
+                <rate>1.0</rate>
+                <potential></potential>
             </adsorption>
             <desorption>
                 <type>desorption</type>
+                <rate>1.0</rate>
+                <potential></potential>
             </desorption>
             <diffusion-left>
-                <type>diffusion</type>
+                <type>slide</type>
+                <step>1</step>
+                <rate>1.0</rate>
+                <potential></potential>
             </diffusion-left>
             <diffusion-right>
-                <type>diffusion</type>
+                <type>slide</type>
+                <step>-1</step>
+                <rate>1.0</rate>
+                <potential></potential>
             </diffusion-right>
-            <hopping>
-                <type>hopping</type>
-            </hopping>
-            <unwrapping>
-                <type>unwrapping</type>
-            </unwrapping>
         </transitions>
     </nuc>
 </particles>
 
 <kmc>
-    <temperature>1</temperature>
+    <beta>1</beta>
     <seed>10011989</seed>
     <last_time>100000</last_time>
     <plugins>
         <nucdistribution>
             <type>distribution</type>
-            <particle>nuc</particle>
+            <state>nuc</state>
             <output>nuc-dist.txt</output>
         </nucdistribution>
       
