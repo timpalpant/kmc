@@ -39,9 +39,11 @@ namespace kmc {
     const boost::property_tree::ptree& particles = pt.get_child("particles");
     for (const std::pair<std::string,boost::property_tree::ptree>& ppair : particles) {
       std::string name = ppair.first;
-      std::cout << "Initializing particle " << name << std::endl;
+      lattice::State* state = lattice::State::for_name(name);
+      std::cout << "Initializing particle " << name 
+        << " (state " << state->id() << ")" << std::endl;
       boost::property_tree::ptree pconfig = ppair.second;
-      Particle particle(name);
+      Particle particle(state);
       particle.configure(pconfig);
       params.add_particle(particle);
     }
@@ -136,7 +138,7 @@ namespace kmc {
         } else if (is_cfg) {
           std::string::size_type eq = arg.find('=');
           std::string key = arg.substr(0, eq);
-          std::string value = arg.substr(eq);
+          std::string value = arg.substr(eq+1);
           pt.put(key, value);
         } else {
           std::cerr << "USAGE: kmc [--include ARK] [--cfg KEY=VALUE]" << std::endl;

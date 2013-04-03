@@ -25,7 +25,7 @@ namespace kmc {
     void Trajectory::process(double time) {
       of_ << time << '\t';
       for (const lattice::State* s : lattice_->states()) {
-        of_ << s->id();
+        of_ << s->id() << '.';
       }
       of_ << std::endl;
     }

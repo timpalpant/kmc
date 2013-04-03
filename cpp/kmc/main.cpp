@@ -14,6 +14,7 @@
 #include "kmc.h"
 
 kmc::lattice::Lattice* init_lattice(const kmc::Parameters& params) {
+  std::cout << "Initializing lattice" << std::endl;
   return new kmc::lattice::Lattice(params.lattice_size(),
                                    params.boundary_condition());
 }
@@ -21,8 +22,10 @@ kmc::lattice::Lattice* init_lattice(const kmc::Parameters& params) {
 std::vector<kmc::Transition*> 
 init_transitions(const kmc::Parameters& params,
                 const kmc::lattice::Lattice* lattice) {
+  std::cout << "Initializing transitions" << std::endl;
   std::vector<kmc::Transition*> transitions;
   for (const kmc::Particle& p : params.particles()) {
+    std::cout << "Initializing transitions for particle: " << p.name() << std::endl;
     const std::vector<kmc::Transition*>& particle_transitions = p.transitions(lattice,
                                                                               params.beta());
     transitions.insert(transitions.end(),
@@ -36,6 +39,7 @@ init_transitions(const kmc::Parameters& params,
 std::vector<std::shared_ptr<kmc::plugin::Plugin>> 
 init_plugins(const kmc::Parameters& params,
             kmc::lattice::Lattice* lattice) {
+  std::cout << "Initializing plugins" << std::endl;
   std::vector<std::shared_ptr<kmc::plugin::Plugin>> plugins = params.plugins();
   for (std::shared_ptr<kmc::plugin::Plugin> plugin : plugins) {
     plugin->boot(lattice);
@@ -48,6 +52,7 @@ init_plugins(const kmc::Parameters& params,
 kmc::KineticMonteCarlo init_kmc(const kmc::Parameters& params,
                                 kmc::TransitionManager* manager,
                                 std::vector<std::shared_ptr<kmc::plugin::Plugin>>& plugins) {
+  std::cout << "Initializing KMC simulator" << std::endl;
   kmc::KineticMonteCarlo kmc(manager, plugins);
   
   kmc.set_seed(params.seed());

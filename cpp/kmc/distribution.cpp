@@ -27,7 +27,7 @@ namespace kmc {
     void Distribution::process(double time) {
       double dt = time - last_time_;
       for (std::size_t i = 0; i < last_state_.size(); i++) {
-        if (last_state_[i] == state_) {
+        if (last_state_[i] == state_ || last_state_[i]->parent() == state_) {
           dist_[i] += dt;
         }
         last_state_[i] = lattice_->get(i);

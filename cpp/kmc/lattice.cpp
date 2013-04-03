@@ -10,7 +10,8 @@
 
 namespace kmc {
   namespace lattice {
-    Lattice::Lattice(std::size_t size, BoundaryCondition bc) : states_(size), bc_(bc) {
+    Lattice::Lattice(std::size_t size, BoundaryCondition bc) 
+      : states_(size), bc_(bc) {
       fill(State::EMPTY);
     }
     
@@ -30,6 +31,10 @@ namespace kmc {
       
       states_[i] = state;
       return true;
+    }
+
+    bool Lattice::perform(const Action& a) {
+      return set(a.coord(), a.state());
     }
   }
 }

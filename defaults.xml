@@ -9,12 +9,12 @@
         <transitions>
             <adsorption>
                 <type>adsorption</type>
-                <rate>1.0</rate>
+                <rate>0.1</rate>
                 <potential></potential>
             </adsorption>
             <desorption>
                 <type>desorption</type>
-                <rate>1.0</rate>
+                <rate>0.1</rate>
                 <potential></potential>
             </desorption>
             <diffusion-left>
@@ -36,7 +36,7 @@
 <kmc>
     <beta>1</beta>
     <seed>10011989</seed>
-    <last_time>100000</last_time>
+    <last_time>10000</last_time>
     <plugins>
         <nucdistribution>
             <type>distribution</type>
@@ -46,7 +46,7 @@
       
         <status>
             <type>status</type>
-            <interval>20000</interval>
+            <interval>10000</interval>
         </status>
     </plugins>
 </kmc>

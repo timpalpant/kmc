@@ -6,3 +6,5 @@ docs
 *.class
 *.log
 .DS_Store
+*~
+*.o

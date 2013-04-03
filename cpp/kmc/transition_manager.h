@@ -30,14 +30,10 @@ namespace kmc {
     lattice::Lattice* lattice_;
     std::vector<Transition*> transitions_;
     std::vector<double> accumulated_rates_;
+    // Transitions that depend on a (coordinate,state)
+    std::vector<std::vector<std::vector<Transition*>>> downstream_coord_;
+    // Transitions downstream of another transition
     std::vector<std::vector<Transition*>> downstream_;
-    
-    // Attempt to optimize the Transition updates
-    // As long as all Actions are meaningful (i.e. they change the State)
-    // then we can assume that any changes to a Transition that was enabled
-    // will disable it. If we detect non-meaningful actions,
-    // optimization will be automatically turned off
-    bool optimize_ = true;
     
     std::size_t transition(const double r) const;
     void update_transition(Transition* t);

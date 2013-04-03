@@ -24,10 +24,14 @@ namespace kmc {
   
   class ParticleTransition {
   protected:
-    double rate_;
+    double rate_ = 0;
     std::vector<double> potential_;
     
-    double rate(const std::size_t i, const std::size_t j,
+    /**
+     * Get the rate for a particle bound from i to j
+     */
+    double rate(const std::size_t i, 
+                const std::size_t j,
                 const double beta) const;
     
   public:
@@ -67,8 +71,9 @@ namespace kmc {
   };
   
   class UnwrapTransition : public ParticleTransition {
+  private:
+    double rate(const std::size_t i, const double beta) const;
   public:
-    virtual void configure(const boost::property_tree::ptree& pt) override;
     virtual std::vector<Transition*> transitions(const lattice::Lattice* lattice,
                                                  const Particle& p,
                                                  const double temperature) override;
@@ -84,21 +89,29 @@ namespace kmc {
   
   class Particle {
   private:
-    std::string name_;
+    lattice::State* state_;
     double beta_;
     std::vector<std::shared_ptr<ParticleTransition>> transitions_;
     std::size_t size_;
-    bool unwrap_;
+    bool unwrap_ = false;
 
   public:
-    Particle(const std::string& name) : name_(name) { }
+    Particle(lattice::State* state) : state_(state) { }
     void configure(const boost::property_tree::ptree& pt) throw (particle_error);
     std::vector<Transition*> transitions(const lattice::Lattice* lattice,
                                          const double temperature) const;
     
-    lattice::State* state() const;
-    lattice::State* state(std::size_t i) const;
-    std::string name() const { return name_; }
+    lattice::State* state() const { return state_; }
+    
+    lattice::State* state(std::size_t i) const throw (particle_error) {
+      if (i < 0 || i >= size()) {
+        throw particle_error("Invalid substate exceeds particle size");
+      }
+      
+      return state()->substate(i);
+    }
+  
+    std::string name() const { return state_->name(); }
     std::size_t size() const { return size_; }
     double beta() const { return beta_; }
     bool unwrap() const { return unwrap_; }

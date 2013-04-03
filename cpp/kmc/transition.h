@@ -16,7 +16,6 @@
 #ifndef kmc_transition_h
 #define kmc_transition_h
 
-#include <string>
 #include <vector>
 
 #include "contingency.h"
@@ -24,7 +23,6 @@
 namespace kmc {
   class Transition {
   private:
-    std::string name_;
     std::vector<Condition> conditions_;
     std::vector<Action> actions_;
     double rate_;
@@ -42,8 +40,6 @@ namespace kmc {
     void set_rate(const double rate) { rate_ = rate; }
     bool enabled() const { return enabled_; }
     void set_enabled(const bool enabled) { enabled_ = enabled; }
-    std::string name() const { return name_; }
-    void set_name(const std::string& name) { name_ = name; }
   };
 }
 

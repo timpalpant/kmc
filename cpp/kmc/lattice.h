@@ -24,7 +24,7 @@ namespace kmc {
     class Lattice {
     private:
       std::vector<State*> states_;
-      BoundaryCondition bc_;
+      BoundaryCondition bc_; 
       
     public:
       Lattice(std::size_t size, BoundaryCondition bc);
@@ -32,8 +32,14 @@ namespace kmc {
       const std::vector<State*>& states() const { return states_; }
       State* get(const std::size_t i) const { return states_[i]; }
       bool set(const std::size_t i, State* state);
+
+      bool perform(const Action& a);
       bool satisfies(const Condition& c) const {
-        return get(c.coord()) == c.state();
+        if (c.condition()) {
+          return get(c.coord()) == c.state();
+        } else {
+          return get(c.coord()) != c.state();
+        }
       }
       
       void fill(State* state) {

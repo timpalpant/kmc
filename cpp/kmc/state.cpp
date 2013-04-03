@@ -8,36 +8,41 @@
 
 #include "state.h"
 #include <map>
+#include <boost/lexical_cast.hpp>
 
 namespace kmc {
   namespace lattice {
-    std::map<std::string, State*> states_;
+    std::map<std::string, State*> states_by_name_;
+    std::vector<State*> states_by_id_;
     
     State* State::for_name(const std::string& name) {
-      if (states_.count(name)) {
-        return states_[name];
+      if (states_by_name_.count(name)) {
+        return states_by_name_[name];
       }
       
-      State* state = new State(name);
-      states_[name] = state;
-      return state;
+      return new State(name);
     }
     
-    std::vector<State*> State::states() {
-      std::vector<State*> states;
-      states.reserve(states_.size());
-      for (const std::pair<std::string, State*>& pair : states_) {
-        states.push_back(pair.second);
-      }
-      return states;
+    const std::vector<State*>& State::states() {
+      return states_by_id_;
+    }
+    
+    State* State::substate(const std::size_t i) const {
+      std::string ssname = name()+"-"+boost::lexical_cast<std::string>(i);
+      State* sstate = for_name(ssname);
+      (*sstate).parent_ = this;
+      return sstate;
     }
     
     std::size_t State::n_states() {
-      return states_.size();
+      return states_by_id_.size();
     }
     
     State::State(const std::string& name)
-      : id_(n_states()), name_(name) { }
+      : id_(n_states()), name_(name) { 
+      states_by_name_[name] = this;
+      states_by_id_.push_back(this);
+    }
     
     State* State::EMPTY = State::for_name("empty");
     State* State::STERIC = State::for_name("steric");

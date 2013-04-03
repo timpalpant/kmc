@@ -31,9 +31,18 @@ namespace kmc {
   };
   
   class Condition : public Contingency {
+  private:
+    bool condition_ = true;
+    
   public:
     Condition(const std::size_t coord, lattice::State* state)
-      : Contingency(coord, state) { }
+      : Condition(coord, state, true) { }
+      
+    Condition(const std::size_t coord, lattice::State* state, 
+              bool condition) : Contingency(coord, state), 
+              condition_(condition) { }
+      
+    bool condition() const { return condition_; }
   };
 
   class Action : public Contingency {

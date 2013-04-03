@@ -20,6 +20,7 @@ namespace kmc {
     private:
       std::size_t id_;
       std::string name_;
+      const State* parent_ = nullptr;
       
       explicit State(const std::string& name);
       
@@ -27,11 +28,14 @@ namespace kmc {
       static State* EMPTY;
       static State* STERIC;
       static State* for_name(const std::string& name);
-      static std::vector<State*> states();
+      static State* for_id(const std::size_t id);
+      static const std::vector<State*>& states();
       static std::size_t n_states();
       
+      const State* parent() const { return parent_; }
+      State* substate(const std::size_t i) const; 
       std::size_t id() const { return id_; }
-      std::string name() const { return name_; }      
+      std::string name() const { return name_; }   
     };
   }
 }
