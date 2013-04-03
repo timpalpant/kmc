@@ -1,0 +1,13 @@
+C++:
+- Finish parameters parsing for C++
+
+Java:
+- Update Java parameters parser to use XML config files
+- Update to reflect C++ design
+- Update trajectory viewer
+
+Both:
+- Allow non-uniform energy landscapes
+- Allow unwrapping
+- Ensure that the trajectory formats of Java and C++ versions are compatible
+- Postprocessing tools / libs for trajectories? (readers)

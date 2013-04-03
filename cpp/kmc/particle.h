@@ -25,13 +25,16 @@ namespace kmc {
     double adsorption_rate_ = 1.0;
     double desorption_rate_ = 1.0;
     double diffusion_rate_ = 1.0;
-    
+
   public:
     Particle(lattice::State* state);
+    void configure(const boost::property_tree::ptree& pt);
     
     std::vector<Transition*> adsorption_transitions(const lattice::Lattice* lattice) const;
     std::vector<Transition*> desorption_transitions(const lattice::Lattice* lattice) const;
     std::vector<Transition*> diffusion_transitions(const lattice::Lattice* lattice) const;
+    std::vector<Transition*> unwrapping_transitions(const lattice::Lattice* lattice) const;
+    std::vector<Transition*> hopping_transitions(const lattice::Lattice* lattice) const;
     std::vector<Transition*> transitions(const lattice::Lattice* lattice) const;
     
     std::size_t size() const { return size_; }

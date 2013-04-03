@@ -6,7 +6,26 @@
 <particles>
     <nuc>
         <size>147</size>
-        <unwrap>true</unwrap>
+        <transitions>
+            <adsorption>
+                <type>adsorption</type>
+            </adsorption>
+            <desorption>
+                <type>desorption</type>
+            </desorption>
+            <diffusion-left>
+                <type>diffusion</type>
+            </diffusion-left>
+            <diffusion-right>
+                <type>diffusion</type>
+            </diffusion-right>
+            <hopping>
+                <type>hopping</type>
+            </hopping>
+            <unwrapping>
+                <type>unwrapping</type>
+            </unwrapping>
+        </transitions>
     </nuc>
 </particles>
 
@@ -17,14 +36,13 @@
     <plugins>
         <nucdistribution>
             <type>distribution</type>
+            <particle>nuc</particle>
+            <output>nuc-dist.txt</output>
         </nucdistribution>
-      
-        <tfdistribution>
-            <type>distribution</type>
-        </tfdistribution>
       
         <status>
             <type>status</type>
+            <interval>20000</interval>
         </status>
     </plugins>
 </kmc>

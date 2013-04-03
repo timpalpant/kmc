@@ -18,11 +18,12 @@ kmc::lattice::Lattice* initLattice(const kmc::Parameters& params) {
                                    params.boundary_condition());
 }
 
-std::vector<kmc::Transition*> initTransitions(const kmc::lattice::Lattice* lattice,
-                                              const std::vector<kmc::Particle>& particles) {
+std::vector<kmc::Transition*> 
+initTransitions(const kmc::Parameters& params,
+                const kmc::lattice::Lattice* lattice) {
   std::vector<kmc::Transition*> transitions;
-  for (const kmc::Particle& p : particles) {
-    std::vector<kmc::Transition*> particle_transitions = p.transitions(lattice);
+  for (const kmc::Particle& p : params.particles()) {
+    const std::vector<kmc::Transition*>& particle_transitions = p.transitions(lattice);
     transitions.insert(transitions.end(),
                        particle_transitions.begin(),
                        particle_transitions.end());
@@ -31,8 +32,9 @@ std::vector<kmc::Transition*> initTransitions(const kmc::lattice::Lattice* latti
   return transitions;
 }
 
-std::vector<std::shared_ptr<kmc::plugin::Plugin>> initPlugins(const kmc::Parameters& params,
-                                                              kmc::lattice::Lattice* lattice) {
+std::vector<std::shared_ptr<kmc::plugin::Plugin>> 
+initPlugins(const kmc::Parameters& params,
+            kmc::lattice::Lattice* lattice) {
   std::vector<std::shared_ptr<kmc::plugin::Plugin>> plugins = params.plugins();
   for (std::shared_ptr<kmc::plugin::Plugin> plugin : plugins) {
     plugin->boot(lattice);
@@ -64,9 +66,7 @@ int main(int argc, const char* argv[]) {
   
   std::cout << "Initializing simulation" << std::endl;
   kmc::lattice::Lattice* lattice = initLattice(params);
-  kmc::TransitionManager* manager = new kmc::TransitionManager(lattice,
-                                                               initTransitions(lattice,
-                                                                               params.particles()));
+  kmc::TransitionManager* manager = new kmc::TransitionManager(lattice, initTransitions(params, lattice));
   std::vector<std::shared_ptr<kmc::plugin::Plugin>> plugins = initPlugins(params, lattice);
   kmc::KineticMonteCarlo kmc = initKMC(params, manager, plugins);
   

@@ -10,15 +10,17 @@
 
 namespace kmc {
   namespace plugin {
-    Distribution::Distribution(const boost::filesystem::path& p,
-                               lattice::State* state)
-      : p_(p), state_(state) { }
+    void Distribution::configure(const boost::property_tree::ptree& pt) {
+      p_ = pt.get<boost::filesystem::path>("output");
+      std::string particle = pt.get<std::string>("particle");
+      state_ = lattice::State::for_name(particle);
+    }
     
     void Distribution::boot(kmc::lattice::Lattice* lattice) {
       lattice_ = lattice;
       last_state_ = std::vector<lattice::State*>(lattice_->states());
       dist_ = std::vector<double>(lattice_->size());
-      of_.open(p_.string());
+      of_.open(p_.c_str());
       of_ << "# Position\tProbability" << std::endl;
     }
     

@@ -27,12 +27,10 @@ namespace kmc {
       
       double last_time_ = 0;
       std::vector<lattice::State*> last_state_;
-      std::vector<double> dist_;
+      std::vector<double> dist_; 
       
     public:
-      Distribution(const boost::filesystem::path& p,
-                   lattice::State* state);
-      
+      virtual void configure(const boost::property_tree::ptree& pt) override;
       virtual void boot(kmc::lattice::Lattice* lattice) override;
       virtual void process(double time) override;
       virtual void close() override;

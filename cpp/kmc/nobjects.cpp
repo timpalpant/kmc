@@ -10,12 +10,15 @@
 
 namespace kmc {
   namespace plugin {
-    NObjects::NObjects(const boost::filesystem::path& p,
-                       lattice::State* state) : p_(p), state_(state) { }
+    void NObjects::configure(const boost::property_tree::ptree& pt) {
+      p_ = pt.get<boost::filesystem::path>("output");
+      std::string particle = pt.get<std::string>("particle");
+      state_ = lattice::State::for_name(particle);
+    }
     
     void NObjects::boot(kmc::lattice::Lattice* lattice) {
       lattice_ = lattice;
-      of_.open(p_.string());
+      of_.open(p_.c_str());
       of_ << "# " << state_->name() << std::endl;
     }
 

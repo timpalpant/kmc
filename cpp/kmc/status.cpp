@@ -12,7 +12,9 @@
 
 namespace kmc {
   namespace plugin {
-    Status::Status(unsigned long long interval) : interval_(interval) { }
+    void Status::configure(const boost::property_tree::ptree& pt) {
+      interval_ = pt.get<unsigned long long>("interval");
+    }
     
     void Status::process(double time) {
       if (++nsteps_ % interval_ == 0) {

@@ -12,8 +12,13 @@
 
 namespace kmc {
   Particle::Particle(lattice::State* state) : state_(state) { }
+
+  void Particle::configure(const boost::property_tree::ptree& pt) {
+    size_ = pt.get<std::size_t>("size");
+  }
   
-  std::vector<Transition*> Particle::adsorption_transitions(const lattice::Lattice* lattice) const {
+  std::vector<Transition*> 
+  Particle::adsorption_transitions(const lattice::Lattice* lattice) const {
     std::vector<Transition*> transitions;
     
     for (std::size_t i = 0; i < lattice->size()-size(); i++) {
@@ -36,7 +41,8 @@ namespace kmc {
     return transitions;
   }
   
-  std::vector<Transition*> Particle::desorption_transitions(const lattice::Lattice* lattice) const {
+  std::vector<Transition*> 
+  Particle::desorption_transitions(const lattice::Lattice* lattice) const {
     std::vector<Transition*> transitions;
     
     for (std::size_t i = 0; i < lattice->size()-size(); i++) {
@@ -56,7 +62,8 @@ namespace kmc {
     return transitions;
   }
   
-  std::vector<Transition*> Particle::diffusion_transitions(const lattice::Lattice* lattice) const {
+  std::vector<Transition*> 
+  Particle::diffusion_transitions(const lattice::Lattice* lattice) const {
     std::vector<Transition*> transitions;
     
     // Diffusion to the right
@@ -93,8 +100,23 @@ namespace kmc {
     
     return transitions;
   }
+
+  std::vector<Transition*> 
+  Particle::unwrapping_transitions(const lattice::Lattice* lattice) const {
+    std::vector<Transition*> transitions;
+
+    return transitions;
+  }
+
+  std::vector<Transition*> 
+  Particle::hopping_transitions(const lattice::Lattice* lattice) const {
+    std::vector<Transition*> transitions;
+
+    return transitions;
+  }
   
-  std::vector<Transition*> Particle::transitions(const lattice::Lattice* lattice) const {
+  std::vector<Transition*> 
+  Particle::transitions(const lattice::Lattice* lattice) const {
     std::vector<Transition*> transitions;
     
     const std::vector<Transition*>& ads = adsorption_transitions(lattice);
@@ -106,6 +128,12 @@ namespace kmc {
     const std::vector<Transition*>& diff = diffusion_transitions(lattice);
     transitions.insert(transitions.end(), diff.begin(), diff.end());
     
+    const std::vector<Transition*>& unwrap = unwrapping_transitions(lattice);
+    transitions.insert(transitions.end(), unwrap.begin(), unwrap.end());
+
+    const std::vector<Transition*>& hop = hopping_transitions(lattice);
+    transitions.insert(transitions.end(), hop.begin(), hop.end());
+
     return transitions;
   }
   

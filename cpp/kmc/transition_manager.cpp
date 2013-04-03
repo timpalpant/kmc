@@ -10,7 +10,7 @@
 
 #include <iostream>
 #include <set>
-#include <cassert>
+#include <stdexcept>
 
 namespace kmc {
   // Attempt to optimize the Transition updates
@@ -28,6 +28,10 @@ namespace kmc {
     std::cout << "Initializing transition manager with "
       << transitions_.size() << " transitions and " << lattice::State::n_states()
       << " states" << std::endl;
+
+    if (transitions_.size() == 0) {
+      throw std::runtime_error("Must have at least one transition");
+    }
       
     // Since we have all conditions and actions up front
     // we can construct a minimal dependency graph:

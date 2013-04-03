@@ -13,7 +13,6 @@
 #ifndef kmc_contingency_h
 #define kmc_contingency_h
 
-#include <sstream>
 #include "state.h"
 
 namespace kmc {

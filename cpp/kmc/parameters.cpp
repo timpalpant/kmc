@@ -7,71 +7,111 @@
 //
 
 #include "parameters.h"
-#include "plugin.h"
-#include "status.h"
-#include "trajectory.h"
-#include "distribution.h"
-#include "nobjects.h"
+#include "plugin_factory.h"
 
 #include <boost/property_tree/xml_parser.hpp>
 
 #include <iostream>
+#include <queue>
 
 namespace kmc {
-  void Parameters::update(const boost::property_tree::ptree& pt) throw (config_error) {
+  Parameters parse(const boost::property_tree::ptree& pt) throw (config_error) {
+    Parameters params;
+    
     // Load lattice parameters
-    lattice_size_ = pt.get<std::size_t>("lattice.length");
+    params.set_lattice_size(pt.get<std::size_t>("lattice.length"));
     std::string bc = pt.get("lattice.bc", "fixed");
     if (bc == "fixed") {
-      bc_ = lattice::BoundaryCondition::FIXED;
+      params.set_boundary_condition(lattice::BoundaryCondition::FIXED);
     } else if (bc == "periodic") {
-      bc_ = lattice::BoundaryCondition::PERIODIC;
+      params.set_boundary_condition(lattice::BoundaryCondition::PERIODIC);
     } else {
       throw config_error("Unknown boundary condition: "+bc);
     }
     
     // Load particle parameters
-    boost::property_tree::ptree particles = pt.get_child("particles");
+    const boost::property_tree::ptree& particles = pt.get_child("particles");
     for (const std::pair<std::string,boost::property_tree::ptree>& ppair : particles) {
       std::string name = ppair.first;
       std::cout << "Initializing particle " << name << std::endl;
       boost::property_tree::ptree pconfig = ppair.second;
       lattice::State* state = lattice::State::for_name(name);
       Particle particle(state);
-      
-      // Configure the particle
-      particle.set_size(pconfig.get<std::size_t>("size"));
-      
-      particles_.push_back(particle);
+      particle.configure(pconfig);     
+      params.add_particle(particle);
     }
     
     // Load simulation parameters
-    boost::property_tree::ptree kmc = pt.get_child("kmc");
-    temperature_ = kmc.get("temperature", 1.0);
-    t_final_ = kmc.get<double>("last_time");
-    seed_ = kmc.get<int>("seed");
+    const boost::property_tree::ptree& kmc = pt.get_child("kmc");
+    params.set_temperature(kmc.get("temperature", 1.0));
+    params.set_t_final(kmc.get<double>("last_time"));
+    params.set_seed(kmc.get<std::size_t>("seed"));
     
     // Load plugins
-    boost::property_tree::ptree plugins = kmc.get_child("plugins");
-    plugin::Plugin* status = new plugin::Status(20000);
-    plugins_.push_back(std::shared_ptr<plugin::Plugin>(status));
+    const boost::property_tree::ptree& plugins = kmc.get_child("plugins");
+    for (const std::pair<std::string,boost::property_tree::ptree>& ppair : plugins) {
+      std::string name = ppair.first;
+      boost::property_tree::ptree pconfig = ppair.second;
+      std::string type = pconfig.get<std::string>("type");
+      plugin::Plugin* plugin = plugin::for_type(type);
+      plugin->configure(pconfig);
+      params.add_plugin(std::shared_ptr<plugin::Plugin>(plugin));
+    }
     
-    //boost::filesystem::path trj_output("test.trj");
-    //plugin::Plugin* trj = new plugin::Trajectory(trj_output);
-    //params.plugins_.push_back(std::shared_ptr<plugin::Plugin>(trj));
-    
-    boost::filesystem::path dist_output("dist.txt");
-    plugin::Plugin* dist = new plugin::Distribution(dist_output,
-                                                    lattice::State::for_name("nuc"));
-    plugins_.push_back(std::shared_ptr<plugin::Plugin>(dist));
-    
-    boost::filesystem::path nobjects_output("nobjects.txt");
-    plugin::Plugin* nobjects = new plugin::NObjects(nobjects_output,
-                                                    lattice::State::for_name("nuc"));
-    plugins_.push_back(std::shared_ptr<plugin::Plugin>(nobjects));
+    return params;
   }
-  
-  boost::property_tree::ptree load_xml(const boost::filesystem::path& p) {
+
+  /**
+  * Merge one property tree into another
+  */  
+  void merge(boost::property_tree::ptree& rptFirst, 
+             const boost::property_tree::ptree& rptSecond) {
+    // Keep track of keys and values (subtrees) in second property tree
+    std::queue<std::string> qKeys;
+    std::queue<boost::property_tree::ptree> qValues;
+    qValues.push(rptSecond);
+
+    // Iterate over second property tree
+    while(!qValues.empty()) {
+      // Setup keys and corresponding values
+      boost::property_tree::ptree ptree = qValues.front();
+      qValues.pop();
+      std::string keychain = "";
+      if(!qKeys.empty()) {
+        keychain = qKeys.front();
+        qKeys.pop();
+      }
+
+      // Iterate over keys level-wise
+      for(const boost::property_tree::ptree::value_type& child : ptree) {
+        if(child.second.size() == 0) { // Leaf
+          // No "." for first level entries
+          std::string s;
+          if(keychain != "") {
+            s = keychain + "." + child.first.data();
+          } else {
+            s = child.first.data();
+          }
+
+          // Put into combined property tree
+          rptFirst.put(s, child.second.data());
+        } else { // Subtree
+          // Put keys (identifiers of subtrees) and all of its parents (where present)
+          // aside for later iteration. Keys on first level have no parents
+          if(keychain != "") {
+            qKeys.push(keychain + "." + child.first.data());
+          } else {
+            qKeys.push(child.first.data());
+          }
+        
+          // Put values (the subtrees) aside, too
+          qValues.push( child.second );
+        }
+      }
+    }
+  }
+
+  boost::property_tree::ptree load_cfg_file(const boost::filesystem::path& p) {
     boost::property_tree::ptree pt;
     std::cout << "Loading configuration from " << p << std::endl;
     boost::property_tree::read_xml(p.string(), pt);
@@ -79,13 +119,11 @@ namespace kmc {
   }
   
   Parameters Parameters::load(const boost::filesystem::path& p) throw (config_error) {
-    Parameters params;
-    params.update(load_xml(p));
-    return params;
+    return parse(load_cfg_file(p));
   }
   
   Parameters Parameters::for_argv(const int argc, const char* argv[]) throw (config_error) {
-    Parameters params;
+    boost::property_tree::ptree pt;
     bool is_include = false, is_cfg = false;
     for (int i = 1; i < argc; i++) {
       std::string arg(argv[i]);
@@ -95,14 +133,12 @@ namespace kmc {
         is_cfg = true;
       } else {
         if (is_include) {
-          params.update(load_xml(arg));
+          merge(pt, load_cfg_file(arg));
         } else if (is_cfg) {
-          boost::property_tree::ptree pt;
           std::string::size_type eq = arg.find('=');
           std::string key = arg.substr(0, eq);
           std::string value = arg.substr(eq);
           pt.put(key, value);
-          params.update(pt);
         } else {
           std::cerr << "USAGE: kmc [--include ARK] [--cfg KEY=VALUE]" << std::endl;
           throw config_error("Cannot parse arguments");
@@ -113,6 +149,6 @@ namespace kmc {
       }
     }
     
-    return params;
+    return parse(pt);
   }
 }

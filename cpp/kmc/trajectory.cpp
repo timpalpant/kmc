@@ -10,11 +10,13 @@
 
 namespace kmc {
   namespace plugin {
-    Trajectory::Trajectory(const boost::filesystem::path& p) : p_(p) { }
+    void Trajectory::configure(const boost::property_tree::ptree& pt) {
+      p_ = pt.get<boost::filesystem::path>("output");
+    }
     
     void Trajectory::boot(kmc::lattice::Lattice* lattice) {
       lattice_ = lattice;
-      of_.open(p_.string());
+      of_.open(p_.c_str());
       for (const kmc::lattice::State* s : kmc::lattice::State::states()) {
         of_ << "# " << s->id() << '\t' << s->name() << std::endl;
       }

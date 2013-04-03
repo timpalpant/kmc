@@ -15,12 +15,11 @@ namespace kmc {
   namespace plugin {
     class Status : public Plugin {
     private:
-      unsigned long long interval_;
+      unsigned long long interval_ = 1;
       unsigned long long nsteps_ = 0;
       
     public:
-      Status(unsigned long long interval);
-      
+      virtual void configure(const boost::property_tree::ptree& pt) override;      
       virtual void process(double time) override;
       virtual void close() override;
     };

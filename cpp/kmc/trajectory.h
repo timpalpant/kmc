@@ -22,8 +22,7 @@ namespace kmc {
       kmc::lattice::Lattice* lattice_;
       
     public:
-      Trajectory(const boost::filesystem::path& p);
-      
+      virtual void configure(const boost::property_tree::ptree& pt) override;      
       virtual void boot(kmc::lattice::Lattice* lattice) override;
       virtual void process(double time) override;
       virtual void close() override;
