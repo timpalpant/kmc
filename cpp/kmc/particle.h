@@ -90,6 +90,7 @@ namespace kmc {
   class Particle {
   private:
     lattice::State* state_;
+    std::vector<lattice::State*> substates_;
     double beta_;
     std::vector<std::shared_ptr<ParticleTransition>> transitions_;
     std::size_t size_;
@@ -104,11 +105,7 @@ namespace kmc {
     lattice::State* state() const { return state_; }
     
     lattice::State* state(std::size_t i) const throw (particle_error) {
-      if (i < 0 || i >= size()) {
-        throw particle_error("Invalid substate exceeds particle size");
-      }
-      
-      return state()->substate(i);
+      return substates_[i];
     }
   
     std::string name() const { return state_->name(); }

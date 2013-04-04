@@ -26,7 +26,6 @@ namespace kmc {
     std::vector<Condition> conditions_;
     std::vector<Action> actions_;
     double rate_;
-    bool enabled_ = false;
     
   public:
     Transition(std::vector<Condition>&& conditions,
@@ -38,8 +37,6 @@ namespace kmc {
     const std::vector<Action>& actions() const { return actions_; }
     double rate() const { return rate_; }
     void set_rate(const double rate) { rate_ = rate; }
-    bool enabled() const { return enabled_; }
-    void set_enabled(const bool enabled) { enabled_ = enabled; }
   };
 }
 

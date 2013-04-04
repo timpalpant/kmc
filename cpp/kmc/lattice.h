@@ -31,9 +31,9 @@ namespace kmc {
       
       const std::vector<State*>& states() const { return states_; }
       State* get(const std::size_t i) const { return states_[i]; }
-      bool set(const std::size_t i, State* state);
+      State* set(const std::size_t i, State* state);
 
-      bool perform(const Action& a);
+      State* perform(const Action& a);
       bool satisfies(const Condition& c) const {
         if (c.condition()) {
           return get(c.coord()) == c.state();

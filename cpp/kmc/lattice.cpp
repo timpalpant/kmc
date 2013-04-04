@@ -24,16 +24,13 @@ namespace kmc {
       return i % size();
     }
     
-    bool Lattice::set(const std::size_t i, State* state) {
-      if (get(i) == state) {
-        return false;
-      }
-      
+    State* Lattice::set(const std::size_t i, State* state) {
+      lattice::State* prev = get(i);
       states_[i] = state;
-      return true;
+      return prev;
     }
 
-    bool Lattice::perform(const Action& a) {
+    State* Lattice::perform(const Action& a) {
       return set(a.coord(), a.state());
     }
   }

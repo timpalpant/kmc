@@ -29,14 +29,15 @@ namespace kmc {
   private:
     lattice::Lattice* lattice_;
     std::vector<Transition*> transitions_;
+    std::vector<double> enabled_rates_;
     std::vector<double> accumulated_rates_;
     // Transitions that depend on a (coordinate,state)
-    std::vector<std::vector<std::vector<Transition*>>> downstream_coord_;
+    std::vector<std::vector<std::vector<std::size_t>>> downstream_coord_;
     // Transitions downstream of another transition
-    std::vector<std::vector<Transition*>> downstream_;
+    std::vector<std::vector<std::size_t>> downstream_;
     
     std::size_t transition(const double r) const;
-    void update_transition(Transition* t);
+    void update_transition(const std::size_t affected);
     void update_all_transitions();
     void update_accumulated_rates();
     

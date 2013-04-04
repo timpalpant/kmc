@@ -1,34 +1,36 @@
 <lattice>
-    <length>1100</length>
+    <length>100</length>
     <bc>fixed</bc>
 </lattice>
 
 <particles>
     <nuc>
-        <size>147</size>
+        <size>20</size>
+        <potential></potential>
+        <unwrap>true</unwrap>
         <transitions>
             <adsorption>
                 <type>adsorption</type>
-                <rate>0.1</rate>
-                <potential></potential>
+                <rate>1.0</rate>
             </adsorption>
             <desorption>
                 <type>desorption</type>
-                <rate>0.1</rate>
-                <potential></potential>
+                <rate>1.0</rate>
             </desorption>
             <diffusion-left>
                 <type>slide</type>
                 <step>1</step>
                 <rate>1.0</rate>
-                <potential></potential>
             </diffusion-left>
             <diffusion-right>
                 <type>slide</type>
                 <step>-1</step>
                 <rate>1.0</rate>
-                <potential></potential>
             </diffusion-right>
+            <unwrap>
+                <type>unwrap</type>
+                <rate>0.1</rate>
+            </unwrap>
         </transitions>
     </nuc>
 </particles>
@@ -46,7 +48,7 @@
       
         <status>
             <type>status</type>
-            <interval>10000</interval>
+            <interval>20000</interval>
         </status>
     </plugins>
 </kmc>

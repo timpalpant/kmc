@@ -10,13 +10,14 @@
 
 #include <iostream>
 #include <algorithm>
+#include <numeric>
 #include <stdexcept>
 
 namespace kmc {
   LatticeTransitionManager::LatticeTransitionManager(lattice::Lattice* lattice,
                                                      std::vector<Transition*>&& transitions) :
-    lattice_(lattice), transitions_(transitions), accumulated_rates_(transitions.size()),
-    downstream_coord_(lattice->size()) {
+    lattice_(lattice), transitions_(transitions), enabled_rates_(transitions.size()),
+    accumulated_rates_(transitions.size()), downstream_coord_(lattice->size()) {
       
     std::cout << "Initializing transition manager with "
       << transitions_.size() << " transitions and " << lattice::State::n_states()
@@ -37,16 +38,16 @@ namespace kmc {
     for (std::size_t i = 0; i < lattice_->size(); i++) {
       downstream_coord_[i].resize(lattice::State::n_states());
     }
-    for (Transition* t : transitions_) {
-      for (const Condition& c : t->conditions()) {
+    for (std::size_t i = 0; i < transitions_.size(); i++) {
+      for (const Condition& c : transitions_[i]->conditions()) {
         // "not" conditions don't get optimized
         // In effect, they are a condition on all states
         if (!c.condition()) {
-          for (std::size_t i = 0; i < lattice::State::n_states(); i++) {
-            downstream_coord_[c.coord()][i].push_back(t);
+          for (std::size_t j = 0; j < lattice::State::n_states(); j++) {
+            downstream_coord_[c.coord()][j].push_back(i);
           }
         } else {
-          downstream_coord_[c.coord()][c.state()->id()].push_back(t);
+          downstream_coord_[c.coord()][c.state()->id()].push_back(i);
         }
       }
     }
@@ -54,17 +55,17 @@ namespace kmc {
     // Now construct a map of Transition -> Transitions
     // If Transition t is performed, which Transitions might be enabled?
     std::cout << "Collecting downstream Transitions for each Transition" << std::endl;
-    std::vector<Transition*> all_downstream;
+    std::vector<std::size_t> all_downstream;
     downstream_.reserve(transitions.size());
-    for (const Transition* t : transitions_) {
+    for (std::size_t i = 0; i < transitions_.size(); i++) {
       all_downstream.clear();
-      for (const Action& a : t->actions()) {
+      for (const Action& a : transitions_[i]->actions()) {
         all_downstream.insert(all_downstream.end(),
                               downstream_coord_[a.coord()][a.state()->id()].begin(),
                               downstream_coord_[a.coord()][a.state()->id()].end());
       }
       std::sort(all_downstream.begin(), all_downstream.end());
-      std::vector<Transition*>::iterator it;
+      std::vector<std::size_t>::iterator it;
       it = std::unique(all_downstream.begin(), all_downstream.end());
       all_downstream.resize(std::distance(all_downstream.begin(), it));
       downstream_.push_back(all_downstream);
@@ -98,23 +99,22 @@ namespace kmc {
     std::size_t selected = transition(r);
     const Transition* t = transitions_[selected];
     for (const Action& a : t->actions()) {
-      lattice::State* prev = lattice_->get(a.coord());
-      bool changed = lattice_->perform(a);
+      lattice::State* prev = lattice_->perform(a);
 
       // These transitions had a condition on the previous state,
       // which changed, so now they must be disabled
-      if (changed) {
-        for (Transition* td : downstream_coord_[a.coord()][prev->id()]) {
-          td->set_enabled(false);
+      if (prev != a.state()) {
+        for (const std::size_t& affected : downstream_coord_[a.coord()][prev->id()]) {
+          enabled_rates_[affected] = 0.0;
         }
       }
     }
 
     // These transitions have a condition on the new state(s),
     // and may now be enabled (if they were disabled before)
-    for (Transition* td : downstream_[selected]) {
-      if (!td->enabled()) {
-        update_transition(td);
+    for (const std::size_t& affected : downstream_[selected]) {
+      if (enabled_rates_[affected] == 0.0) {
+        update_transition(affected);
       }
     }
     
@@ -125,22 +125,20 @@ namespace kmc {
    * Update the table of accumulated rates
    */
   void LatticeTransitionManager::update_accumulated_rates() {
-    accumulated_rates_[0] = transitions_[0]->enabled() * transitions_[0]->rate();
-    for (std::size_t i = 1; i < transitions_.size(); i++) {
-      double rate = transitions_[i]->enabled() * transitions_[i]->rate();
-      accumulated_rates_[i] = accumulated_rates_[i-1] + rate;
-    }
+    std::partial_sum(enabled_rates_.begin(),
+                     enabled_rates_.end(),
+                     accumulated_rates_.begin());
   }
   
   /**
    * Check whether a Transition's conditions are all satisified
    * and mark it as enabled/disabled
    */
-  void LatticeTransitionManager::update_transition(Transition* t) {
-    t->set_enabled(true);
-    for (const Condition& c : t->conditions()) {
+  void LatticeTransitionManager::update_transition(const std::size_t t) {
+    enabled_rates_[t] = transitions_[t]->rate();
+    for (const Condition& c : transitions_[t]->conditions()) {
       if (!lattice_->satisfies(c)) {
-        t->set_enabled(false);
+        enabled_rates_[t] = 0.0;
         break;
       }
     }
@@ -150,7 +148,7 @@ namespace kmc {
    * Mark all Transitions as enabled/disabled
    */
   void LatticeTransitionManager::update_all_transitions() {
-    for (Transition* t : transitions_) {
+    for (std::size_t t = 0; t < transitions_.size(); t++) {
       update_transition(t);
     }
   }

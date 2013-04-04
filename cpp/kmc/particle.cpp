@@ -48,7 +48,7 @@ namespace kmc {
       return std::exp(-beta*total);
     }
     
-    return (j-i+1)*rate_;
+    return rate_;
   }
   
   std::vector<Transition*>
@@ -478,7 +478,10 @@ namespace kmc {
   
   void Particle::configure(const boost::property_tree::ptree& pt) throw (particle_error) {
     size_ = pt.get<std::size_t>("size");
-    std::cout << "Particle has size: " << size_ << std::endl;    
+    std::cout << "Particle has size: " << size_ << std::endl;
+    for (std::size_t i = 0; i < size_; i++) {
+      substates_.push_back(state_->substate(i));
+    }
 
     const boost::property_tree::ptree& transitions = pt.get_child("transitions");
     for (const std::pair<std::string,boost::property_tree::ptree>& pair : transitions) {
