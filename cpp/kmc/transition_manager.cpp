@@ -97,8 +97,7 @@ namespace kmc {
    */
   void LatticeTransitionManager::move(double r) {
     std::size_t selected = transition(r);
-    const Transition* t = transitions_[selected];
-    for (const Action& a : t->actions()) {
+    for (const Action& a : transitions_[selected]->actions()) {
       lattice::State* prev = lattice_->perform(a);
 
       // These transitions had a condition on the previous state,
@@ -135,13 +134,14 @@ namespace kmc {
    * and mark it as enabled/disabled
    */
   void LatticeTransitionManager::update_transition(const std::size_t t) {
-    enabled_rates_[t] = transitions_[t]->rate();
     for (const Condition& c : transitions_[t]->conditions()) {
       if (!lattice_->satisfies(c)) {
         enabled_rates_[t] = 0.0;
-        break;
+        return;
       }
     }
+    // All conditions are satisfied, enable this transition
+    enabled_rates_[t] = transitions_[t]->rate();
   }
   
   /**

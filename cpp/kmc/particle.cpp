@@ -27,27 +27,11 @@ namespace kmc {
   }
   
   void ParticleTransition::configure(const boost::property_tree::ptree& pt) {
-    boost::optional<double> rate = pt.get_optional<double>("rate");
-    if (rate) {
-      rate_ = rate.get();
-    }
-    
-    boost::optional<boost::filesystem::path> p = pt.get_optional<boost::filesystem::path>("potential");
-    if (p) {
-      potential_ = load_potential(p.get());
-    }
+    rate_ = pt.get("rate", 0.0);
   }
   
-  double ParticleTransition::rate(const std::size_t i, const std::size_t j,
-                                  const double beta) const {
-    if (potential_.size() > 0) {
-      double total = 0;
-      for (std::size_t k = i; k < j; k++) {
-        total += potential_[k];
-      }
-      return std::exp(-beta*total);
-    }
-    
+  double AdsorptionTransition::rate(const std::size_t i, const std::size_t j,
+                                    const std::size_t size, const double beta) const {
     return rate_;
   }
   
@@ -61,7 +45,7 @@ namespace kmc {
     if (p.unwrap()) {
       // An absorption transition for each possible unwrapped fraction
       for (std::size_t j = 0; j < p.size(); j++) {
-        for (std::size_t k = j+1; k < p.size(); k++) {
+        for (std::size_t k = j+1; k <= p.size(); k++) {
           std::size_t size = k - j;
           for (std::size_t i = 0; i < lattice->size()-size+1; i++) {
             std::vector<Condition> conditions;
@@ -74,7 +58,7 @@ namespace kmc {
             }
             Transition* t = new Transition(std::move(conditions),
                                            std::move(actions),
-                                           rate(i, i+size, beta));
+                                           rate(i, i+size, p.size(), beta));
             transitions.push_back(t);
             if (transitions.size() % 100000 == 0) {
               std::cout << transitions.size() << std::endl;
@@ -98,7 +82,7 @@ namespace kmc {
         }
         Transition* t = new Transition(std::move(conditions),
                                        std::move(actions),
-                                       rate(i, i+p.size(), beta));
+                                       rate(i, i+p.size(), p.size(), beta));
         //t->set_name(p.name()+"-adsorption-"+boost::lexical_cast<std::string>(i));
         transitions.push_back(t);
       }
@@ -106,6 +90,21 @@ namespace kmc {
     
     std::cout << "Initialized " << transitions.size() << " adsorption transitions" << std::endl;
     return transitions;
+  }
+
+  double DesorptionTransition::rate(const std::size_t i,
+                                    const std::size_t j,
+                                    const std::size_t size,
+                                    const double beta) const {
+    if (potential_.size() > 0) {
+      double total = 0;
+      for (std::size_t k = i; k < j; k++) {
+        total += potential_[i];
+      }
+      return rate_*std::exp(beta*total);
+    }
+
+    return std::pow(rate_, double(size-(j-i)+1)/size);
   }
   
   std::vector<Transition*>
@@ -119,7 +118,7 @@ namespace kmc {
       // A desorption transition for each possible unwrapped fraction
       // There is one desorption transition for each adsorption transition
       for (std::size_t j = 0; j < p.size(); j++) {
-        for (std::size_t k = j+1; k < p.size(); k++) {
+        for (std::size_t k = j+1; k <= p.size(); k++) {
           std::size_t size = k - j;
           for (std::size_t i = 0; i < lattice->size()-size+1; i++) {
             std::vector<Condition> conditions;
@@ -129,8 +128,8 @@ namespace kmc {
               conditions.push_back(Condition(i-1, p.state(j-1), false));
             }
             // Has to be unbound to the right
-            if (k+1 < p.size() && i+size < lattice->size()) { 
-              conditions.push_back(Condition(i+size, p.state(k+1), false));
+            if (k < p.size() && i+size < lattice->size()) { 
+              conditions.push_back(Condition(i+size, p.state(k), false));
             }
             std::vector<Action> actions;
             for (std::size_t l = 0; l < size; l++) {
@@ -141,7 +140,7 @@ namespace kmc {
             }
             Transition* t = new Transition(std::move(conditions),
                                            std::move(actions),
-                                           rate(i, i+size, beta));
+                                           rate(i, i+size, p.size(), beta));
             transitions.push_back(t);
             if (transitions.size() % 100000 == 0) {
               std::cout << transitions.size() << std::endl;
@@ -161,7 +160,7 @@ namespace kmc {
         }
         Transition* t = new Transition(std::move(conditions),
                                        std::move(actions),
-                                       rate(i, i+p.size(), beta));
+                                       rate(i, i+p.size(), p.size(), beta));
         //t->set_name(p.name()+"-desorption-"+boost::lexical_cast<std::string>(i));
         transitions.push_back(t);
       }
@@ -178,12 +177,23 @@ namespace kmc {
   
   double SlideTransition::rate(const std::size_t i, const std::size_t j,
                                const std::size_t i2, const std::size_t j2,
-                               const double beta) const {
-    double rate1 = ParticleTransition::rate(i, j, beta);
-    double rate2 = ParticleTransition::rate(i2, j2, beta);
-    double potential1 = -std::log(rate1) / beta;
-    double potential2 = -std::log(rate2) / beta;
-    return std::exp(-beta*(potential2-potential1));
+                               const std::size_t size, const double beta) const {
+    // If we are on a potential, then the rate
+    // is determined by the difference in energies
+    // between (i,j) and (i2,j2)
+    if (potential_.size() > 0) {
+      double v1 = 0;
+      for (std::size_t k = i; k < j; k++) {
+        v1 += potential_[k];
+      }
+      double v2 = 0;
+      for (std::size_t k = i2; k < j2; k++) {
+        v2 += potential_[k];
+      }
+      return rate_*std::exp(beta*(v1-v2)/2);
+    }
+
+    return std::pow(rate_, double((j2-i2)-(j-i))/size);
   }
   
   std::vector<Transition*>
@@ -229,7 +239,7 @@ namespace kmc {
                                              std::move(actions),
                                              rate(i, i+size,
                                                   i+step_, i+size+step_,
-                                                  beta));
+                                                  p.size(), beta));
               transitions.push_back(t);
               if (transitions.size() % 100000 == 0) {
                 std::cout << transitions.size() << std::endl;
@@ -272,7 +282,7 @@ namespace kmc {
                                              std::move(actions),
                                              rate(i, i+size,
                                                   i+step_, i+size+step_,
-                                                  beta));
+                                                  p.size(), beta));
               transitions.push_back(t);
               if (transitions.size() % 100000 == 0) {
                 std::cout << transitions.size() << std::endl;
@@ -307,7 +317,7 @@ namespace kmc {
                                          std::move(actions),
                                          rate(i, i+p.size(),
                                               i+step_, i+p.size()+step_,
-                                              beta));
+                                              p.size(), beta));
           //std::string from = boost::lexical_cast<std::string>(i);
           //std::string to = boost::lexical_cast<std::string>(i+step_);
           //t->set_name(p.name()+"-slide-"+from+"-"+to);
@@ -338,7 +348,7 @@ namespace kmc {
                                          std::move(actions),
                                          rate(i, i+p.size(),
                                               i+step_, i+p.size()+step_,
-                                              beta));
+                                              p.size(), beta));
           //std::string from = boost::lexical_cast<std::string>(i);
           //std::string to = boost::lexical_cast<std::string>(i+step_);
           //t->set_name(p.name()+"-slide-"+from+"-"+to);
@@ -351,10 +361,21 @@ namespace kmc {
       << step_ << ") transitions" << std::endl;
     return transitions;
   }
+
+  double UnwrapTransition::wrap_rate(const std::size_t i,
+                                     const std::size_t size,
+                                     const double beta) const {
+    return rate_;
+  }
   
-  double UnwrapTransition::rate(const std::size_t i, 
-                                const double beta) const {
-    return ParticleTransition::rate(i, i, beta);
+  double UnwrapTransition::unwrap_rate(const std::size_t i, 
+                                       const std::size_t size,
+                                       const double beta) const {
+    if (potential_.size() > 0) {
+      return rate_*std::exp(beta*potential_[i]);
+    }
+
+    return std::pow(rate_, 1.0/size);
   }
   
   std::vector<Transition*>
@@ -385,7 +406,7 @@ namespace kmc {
           actions.push_back(Action(i, lattice::State::EMPTY));
           Transition* t = new Transition(std::move(conditions),
                                          std::move(actions),
-                                         rate(j, beta));
+                                         unwrap_rate(j, p.size(), beta));
           transitions.push_back(t);
         }
       }
@@ -410,7 +431,7 @@ namespace kmc {
           actions.push_back(Action(i, lattice::State::EMPTY));
           Transition* t = new Transition(std::move(conditions),
                                          std::move(actions),
-                                         rate(j, beta));
+                                         unwrap_rate(j, p.size(), beta));
           transitions.push_back(t);
         }
       }
@@ -431,7 +452,7 @@ namespace kmc {
           actions.push_back(Action(i-1, p.state(j-1)));
           Transition* t = new Transition(std::move(conditions),
                                          std::move(actions),
-                                         rate(j-1, beta));
+                                         wrap_rate(j-1, p.size(), beta));
           transitions.push_back(t);
         }
       }
@@ -452,7 +473,7 @@ namespace kmc {
           actions.push_back(Action(i+1, p.state(j+1)));
           Transition* t = new Transition(std::move(conditions),
                                          std::move(actions),
-                                         rate(j+1, beta));
+                                         wrap_rate(j+1, p.size(), beta));
           transitions.push_back(t);
         }
       }
@@ -468,7 +489,7 @@ namespace kmc {
                         const double beta) const {
     std::vector<Transition*> transitions;
     
-    for (const std::shared_ptr<ParticleTransition>& pt : transitions_) {
+    for (ParticleTransition* pt : transitions_) {
       const std::vector<Transition*>& ts = pt->transitions(lattice, *this, beta);
       transitions.insert(transitions.end(), ts.begin(), ts.end());
     }
@@ -478,9 +499,15 @@ namespace kmc {
   
   void Particle::configure(const boost::property_tree::ptree& pt) throw (particle_error) {
     size_ = pt.get<std::size_t>("size");
-    std::cout << "Particle has size: " << size_ << std::endl;
+    std::cout << "Particle has size = " << size_ << std::endl;
     for (std::size_t i = 0; i < size_; i++) {
       substates_.push_back(state_->substate(i));
+    }
+
+    boost::optional<boost::filesystem::path> p;
+    p = pt.get_optional<boost::filesystem::path>("potential");
+    if (p) {
+      potential_ = load_potential(p.get());
     }
 
     const boost::property_tree::ptree& transitions = pt.get_child("transitions");
@@ -501,8 +528,9 @@ namespace kmc {
         throw particle_error("Unknown particle transition type: "+type);
       }
       
+      transition->set_potential(potential_);
       transition->configure(tconfig);
-      transitions_.push_back(std::shared_ptr<ParticleTransition>(transition));
+      transitions_.push_back(transition);
     }
   }
   

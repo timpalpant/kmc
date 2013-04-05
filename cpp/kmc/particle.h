@@ -27,15 +27,9 @@ namespace kmc {
     double rate_ = 0;
     std::vector<double> potential_;
     
-    /**
-     * Get the rate for a particle bound from i to j
-     */
-    double rate(const std::size_t i, 
-                const std::size_t j,
-                const double beta) const;
-    
-  public:
+  public:   
     virtual void configure(const boost::property_tree::ptree& pt);
+    void set_potential(const std::vector<double>& p) { potential_ = p; }
     virtual std::vector<Transition*> transitions(const lattice::Lattice* lattice,
                                                  const Particle& p,
                                                  const double beta) = 0;
@@ -43,12 +37,21 @@ namespace kmc {
   
   class AdsorptionTransition : public ParticleTransition {
   public:
+    double rate(const std::size_t i,
+                const std::size_t j,
+                const std::size_t size,
+                const double beta) const;
     virtual std::vector<Transition*> transitions(const lattice::Lattice* lattice,
                                                  const Particle& p,
                                                  const double beta) override;
   };
   
   class DesorptionTransition : public ParticleTransition {
+  private:
+    double rate(const std::size_t i,
+                const std::size_t j,
+                const std::size_t size,
+                const double beta) const;
   public:
     virtual std::vector<Transition*> transitions(const lattice::Lattice* lattice,
                                                  const Particle& p,
@@ -61,7 +64,7 @@ namespace kmc {
     
     double rate(const std::size_t i, const std::size_t j,
                 const std::size_t i2, const std::size_t j2,
-                const double beta) const;
+                const std::size_t size, const double beta) const;
     
   public:
     virtual void configure(const boost::property_tree::ptree& pt) override;
@@ -72,7 +75,12 @@ namespace kmc {
   
   class UnwrapTransition : public ParticleTransition {
   private:
-    double rate(const std::size_t i, const double beta) const;
+    double unwrap_rate(const std::size_t i, 
+                       const std::size_t size, 
+                       const double beta) const;
+    double wrap_rate(const std::size_t i,
+                     const std::size_t size,
+                     const double beta) const;
   public:
     virtual std::vector<Transition*> transitions(const lattice::Lattice* lattice,
                                                  const Particle& p,
@@ -91,8 +99,8 @@ namespace kmc {
   private:
     lattice::State* state_;
     std::vector<lattice::State*> substates_;
-    double beta_;
-    std::vector<std::shared_ptr<ParticleTransition>> transitions_;
+    std::vector<double> potential_;
+    std::vector<ParticleTransition*> transitions_;
     std::size_t size_;
     bool unwrap_ = false;
 
@@ -110,8 +118,8 @@ namespace kmc {
   
     std::string name() const { return state_->name(); }
     std::size_t size() const { return size_; }
-    double beta() const { return beta_; }
     bool unwrap() const { return unwrap_; }
+    const std::vector<double>& potential() const { return potential_; }
   };
 }
 
