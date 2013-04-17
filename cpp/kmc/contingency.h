@@ -18,15 +18,15 @@
 namespace kmc {
   class Contingency {
   private:
-    std::size_t coord_;
+    int coord_;
     lattice::State* state_;
     
   protected:
-    Contingency(const std::size_t coord, lattice::State* state)
+    Contingency(const int coord, lattice::State* state)
       : coord_(coord), state_(state) { }
     
   public:
-    std::size_t coord() const { return coord_; }
+    int coord() const { return coord_; }
     lattice::State* state() const { return state_; }
   };
   
@@ -35,10 +35,10 @@ namespace kmc {
     bool condition_ = true;
     
   public:
-    Condition(const std::size_t coord, lattice::State* state)
+    Condition(const int coord, lattice::State* state)
       : Condition(coord, state, true) { }
       
-    Condition(const std::size_t coord, lattice::State* state, 
+    Condition(const int coord, lattice::State* state,
               bool condition) : Contingency(coord, state), 
               condition_(condition) { }
       
@@ -47,7 +47,7 @@ namespace kmc {
 
   class Action : public Contingency {
   public:
-    Action(const std::size_t coord, lattice::State* state)
+    Action(const int coord, lattice::State* state)
       : Contingency(coord, state) { }
   };
 }

@@ -8,7 +8,7 @@
         <size>15</size>
         <potential></potential>
         <concentration></concentration>
-        <transitions>
+        <processes>
             <adsorption>
                 <type>adsorption</type>
                 <rate>1000.0</rate>
@@ -31,7 +31,7 @@
                 <type>unwrap</type>
                 <rate>1000.0</rate>
             </unwrap>
-        </transitions>
+        </processes>
     </nuc>
 </particles>
 

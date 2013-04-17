@@ -10,6 +10,7 @@
 #define kmc_transition_manager_h
 
 #include "lattice.h"
+#include "process.h"
 #include "transition.h"
 
 namespace kmc {
@@ -28,6 +29,7 @@ namespace kmc {
   class LatticeTransitionManager : public TransitionManager {
   private:
     lattice::Lattice* lattice_;
+    std::vector<Process*> processes_;
     std::vector<Transition*> transitions_;
     std::vector<double> enabled_rates_;
     std::vector<double> accumulated_rates_;
@@ -43,7 +45,7 @@ namespace kmc {
     
   public:
     LatticeTransitionManager(lattice::Lattice* lattice,
-                             std::vector<Transition*>&& transitions);
+                             std::vector<Process*>&& processes);
     
     virtual void move(double r) override;
     virtual double rate_total() const override;

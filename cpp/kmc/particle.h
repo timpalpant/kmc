@@ -16,77 +16,10 @@
 #include <boost/filesystem.hpp>
 
 #include "lattice.h"
-#include "transition.h"
+#include "process.h"
 #include "config_error.h"
 
 namespace kmc {
-  class Particle;
-  
-  class ParticleTransition {
-  protected:
-    double rate_ = 0;
-    std::vector<double> potential_;
-    
-  public:   
-    virtual void configure(const boost::property_tree::ptree& pt);
-    void set_potential(const std::vector<double>& p) { potential_ = p; }
-    virtual std::vector<Transition*> transitions(const lattice::Lattice* lattice,
-                                                 const Particle& p,
-                                                 const double beta) = 0;
-  };
-  
-  class AdsorptionTransition : public ParticleTransition {
-  public:
-    double rate(const std::size_t i,
-                const std::size_t j,
-                const std::size_t size,
-                const double beta) const;
-    virtual std::vector<Transition*> transitions(const lattice::Lattice* lattice,
-                                                 const Particle& p,
-                                                 const double beta) override;
-  };
-  
-  class DesorptionTransition : public ParticleTransition {
-  private:
-    double rate(const std::size_t i,
-                const std::size_t j,
-                const std::size_t size,
-                const double beta) const;
-  public:
-    virtual std::vector<Transition*> transitions(const lattice::Lattice* lattice,
-                                                 const Particle& p,
-                                                 const double beta) override;
-  };
-  
-  class SlideTransition : public ParticleTransition {
-  private:
-    int step_;
-    
-    double rate(const std::size_t i, const std::size_t j,
-                const std::size_t i2, const std::size_t j2,
-                const std::size_t size, const double beta) const;
-    
-  public:
-    virtual void configure(const boost::property_tree::ptree& pt) override;
-    virtual std::vector<Transition*> transitions(const lattice::Lattice* lattice,
-                                                 const Particle& p,
-                                                 const double temperature) override;
-  };
-  
-  class UnwrapTransition : public ParticleTransition {
-  private:
-    double unwrap_rate(const std::size_t i, 
-                       const std::size_t size, 
-                       const double beta) const;
-    double wrap_rate(const std::size_t i,
-                     const std::size_t size,
-                     const double beta) const;
-  public:
-    virtual std::vector<Transition*> transitions(const lattice::Lattice* lattice,
-                                                 const Particle& p,
-                                                 const double temperature) override;
-  };
-  
   class particle_error : public config_error {
   public:
     explicit particle_error(const std::string& what_arg)
@@ -100,19 +33,17 @@ namespace kmc {
     lattice::State* state_;
     std::vector<lattice::State*> substates_;
     std::vector<double> potential_;
-    std::vector<ParticleTransition*> transitions_;
+    std::vector<Process*> processes_;
     std::size_t size_;
     bool unwrap_ = false;
 
   public:
     Particle(lattice::State* state) : state_(state) { }
     void configure(const boost::property_tree::ptree& pt) throw (particle_error);
-    std::vector<Transition*> transitions(const lattice::Lattice* lattice,
-                                         const double temperature) const;
+    const std::vector<Process*>& processes() const { return processes_; }
     
     lattice::State* state() const { return state_; }
-    
-    lattice::State* state(std::size_t i) const throw (particle_error) {
+    lattice::State* state(std::size_t i) const {
       return substates_[i];
     }
   

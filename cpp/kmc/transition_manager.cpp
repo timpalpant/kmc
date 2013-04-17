@@ -2,6 +2,13 @@
 //  transition_manager.cpp
 //  kmc
 //
+//  The transition manager keeps track of possible transitions
+//  and their rates, and attempts to calculate the total rate
+//  as efficiently as possible.
+//
+//  The input is the Lattice to simulate and a list of Processes
+//  that can be performed on that lattice
+//
 //  Created by Timothy Palpant on 3/30/13.
 //  Copyright (c) 2013 Timothy Palpant. All rights reserved.
 //
@@ -15,15 +22,14 @@
 
 namespace kmc {
   LatticeTransitionManager::LatticeTransitionManager(lattice::Lattice* lattice,
-                                                     std::vector<Transition*>&& transitions) :
-    lattice_(lattice), transitions_(transitions), enabled_rates_(transitions.size()),
-    accumulated_rates_(transitions.size()), downstream_coord_(lattice->size()) {
+                                                     std::vector<Process*>&& processes) :
+    lattice_(lattice), processes_(processes), downstream_coord_(lattice->size()) {
       
     std::cout << "Initializing transition manager with "
-      << transitions_.size() << " transitions and " << lattice::State::n_states()
+      << processes_.size() << " processes and " << lattice::State::n_states()
       << " states" << std::endl;
 
-    if (transitions_.size() == 0) {
+    if (processes_.size() == 0) {
       throw std::runtime_error("Must have at least one transition");
     }
       

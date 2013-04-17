@@ -15,6 +15,7 @@
 #include "trajectory.h"
 #include "distribution.h"
 #include "nobjects.h"
+#include "twobody.h"
 
 namespace kmc {
   namespace plugin {
@@ -36,6 +37,8 @@ namespace kmc {
         p = new Trajectory();
       } else if (name == "status") {
         p = new Status();
+      } else if (name == "twobody") {
+        p = new TwoBody();
       } else {
         throw plugin_error("Unknown plugin type: "+name);
       }
