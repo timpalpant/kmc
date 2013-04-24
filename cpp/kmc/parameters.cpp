@@ -9,6 +9,7 @@
 #include "parameters.h"
 #include "plugin_factory.h"
 
+#include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
 #include <iostream>
